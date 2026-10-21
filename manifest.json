@@ -1,0 +1,10 @@
+{
+  "name": "Kisima Certified Seeds",
+  "short_name": "Kisima Seeds",
+  "description": "Order certified potato seeds from Kisima Certified Seeds",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5f7f5",
+  "theme_color": "#174d32",
+  "icons": []
+}
