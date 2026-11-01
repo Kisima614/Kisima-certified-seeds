@@ -3,86 +3,115 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#174d32">
-<title>Kisima Certified Seeds</title>
+<title>Kisima Certified Seeds | Quality Potato Seeds</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:#f5f8f4;color:#183326}
-header{background:#174d32;color:white;padding:22px 16px;text-align:center}
-header h1{margin:8px 0;font-size:25px}
-header p{margin:6px}
-nav{background:#103b26;padding:13px;text-align:center}
-nav a{color:white;text-decoration:none;margin:0 9px;font-size:13px}
-.hero{padding:45px 20px;text-align:center;background:#e4efdf}
+body{margin:0;font-family:Arial,sans-serif;background:#f5f8f4;color:#183326;line-height:1.6}
+header{background:#174d32;color:white;text-align:center;padding:28px 15px}
+header h1{margin:8px 0;font-size:28px}
+header p{margin:5px}
+.logo{font-size:45px}
+nav{background:#103b26;padding:13px;text-align:center;position:sticky;top:0;z-index:5}
+nav a{color:white;text-decoration:none;margin:0 10px;font-size:14px}
+.hero{padding:45px 20px;text-align:center;background:linear-gradient(135deg,#e2efdf,#c4dfc0)}
 .hero h2{font-size:30px;color:#174d32}
-.hero p{line-height:1.6}
-.btn{display:inline-block;background:#218443;color:white;padding:13px 22px;border-radius:7px;text-decoration:none;border:0;font-weight:bold}
-section{padding:28px 16px;max-width:900px;margin:auto}
+.hero p{font-size:17px}
+.container{max-width:950px;margin:auto;padding:22px}
+.section{background:white;padding:22px;margin:20px 0;border-radius:12px;box-shadow:0 2px 10px #00000010}
 h2{color:#174d32}
-.products{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-.product{background:white;padding:17px;border-radius:10px;text-align:center;border:1px solid #dce8dc}
-.product h3{margin:5px;color:#174d32}
-.price{font-weight:bold;color:#218443}
-.card{background:white;padding:20px;border-radius:12px;box-shadow:0 2px 9px #0001}
-label{display:block;margin-top:14px;font-weight:bold}
-input,select{width:100%;padding:13px;margin-top:6px;border:1px solid #b9cbb9;border-radius:7px;font-size:16px;background:white}
-.total{background:#e4efdf;padding:17px;margin:18px 0;border-radius:8px;font-size:21px;font-weight:bold}
-.payment{background:#eaf4e9;padding:18px;border-radius:10px;line-height:1.8}
-footer{background:#174d32;color:white;text-align:center;padding:25px;line-height:1.8}
-footer a{color:white}
-@media(min-width:600px){.products{grid-template-columns:repeat(4,1fr)}}
+.products{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+.product{background:#edf5eb;padding:15px;border-radius:10px;text-align:center;font-weight:bold}
+.price{font-size:20px;color:#174d32}
+label{display:block;margin-top:13px;font-weight:bold}
+input,select,textarea{width:100%;padding:13px;margin-top:5px;border:1px solid #ccc;border-radius:7px;font-size:16px;background:white}
+button,.btn{display:block;width:100%;padding:14px;margin-top:15px;background:#174d32;color:white;border:0;border-radius:8px;font-size:17px;font-weight:bold;text-align:center;text-decoration:none;cursor:pointer}
+button:hover,.btn:hover{background:#103b26}
+.total{background:#edf5eb;padding:15px;margin-top:15px;border-radius:8px;font-size:20px;font-weight:bold}
+.contact{background:#174d32;color:white;text-align:center;padding:25px;border-radius:10px}
+.contact h2{color:white}
+footer{background:#103b26;color:white;text-align:center;padding:20px;margin-top:25px}
+.small{font-size:13px;color:#666}
 </style>
 </head>
 <body>
 
 <header>
+<div class="logo">🌱</div>
 <h1>KISIMA CERTIFIED SEEDS</h1>
-<p>Quality Seeds. Better Harvests.</p>
-<p>Certified Potato Planting Seeds</p>
+<p>Quality Potato Seeds for Better Harvests</p>
+<p>Certified and approved seed varieties</p>
 </header>
 
 <nav>
 <a href="#home">Home</a>
-<a href="#seeds">Our Seeds</a>
-<a href="#order">Order Now</a>
+<a href="#varieties">Varieties</a>
+<a href="#prices">Prices</a>
+<a href="#order">Order</a>
 <a href="#contact">Contact</a>
 </nav>
 
-<div class="hero" id="home">
+<section class="hero" id="home">
 <h2>Welcome to Kisima Certified Seeds</h2>
-<p>Your trusted supplier of quality certified potato planting seeds.<br>
-Order today and enjoy countrywide delivery.</p>
-<a class="btn" href="#order">PLACE YOUR ORDER</a>
-</div>
-
-<section id="seeds">
-<h2>Our Potato Seed Varieties</h2>
-<div class="products">
-<div class="product"><h3>Unica</h3><p class="price">KSh 3,450</p></div>
-<div class="product"><h3>Shangi</h3><p class="price">KSh 3,450</p></div>
-<div class="product"><h3>Super Shangi</h3><p class="price">KSh 3,450</p></div>
-<div class="product"><h3>White Shangi</h3><p class="price">KSh 3,450</p></div>
-<div class="product"><h3>Dutch</h3><p class="price">KSh 3,450</p></div>
-<div class="product"><h3>Sheherekea</h3><p class="price">KSh 3,450</p></div>
-<div class="product"><h3>Stephen</h3><p class="price">KSh 3,450</p></div>
-<div class="product"><h3>Markies</h3><p class="price">KSh 3,450</p></div>
-</div>
-<p>Prices are per 50 kg bag. Available seed classes: C1 and C2.</p>
+<p>Your trusted source for quality certified potato seeds.</p>
+<p>Order your preferred variety and arrange delivery to your location.</p>
+<a class="btn" href="#order">ORDER YOUR SEEDS NOW</a>
 </section>
 
-<section id="order">
+<div class="container">
+
+<section class="section" id="varieties">
+<h2>Our Potato Seed Varieties</h2>
+<div class="products">
+<div class="product">🥔<br>Unica</div>
+<div class="product">🥔<br>Shangi</div>
+<div class="product">🥔<br>Super Shangi</div>
+<div class="product">🥔<br>White Shangi</div>
+<div class="product">🥔<br>Dutch</div>
+<div class="product">🥔<br>Sheherekea</div>
+<div class="product">🥔<br>Stephen</div>
+<div class="product">🥔<br>Markies</div>
+</div>
+</section>
+
+<section class="section" id="prices">
+<h2>Seed Prices</h2>
+<p>All prices are per 50kg bag.</p>
+<div class="products">
+<div class="product">
+C1 Seed
+<div class="price">KSh 3,450</div>
+</div>
+<div class="product">
+C2 Seed
+<div class="price">KSh 3,450</div>
+</div>
+</div>
+<p class="small">All seed bags are supplied in certified 50kg packaging.</p>
+</section>
+
+<section class="section" id="order">
 <h2>Place Your Order</h2>
-<div class="card">
+<p>Complete the form below to send your order directly to Kisima through WhatsApp.</p>
+
 <form id="orderForm">
 <label>Full Name</label>
-<input id="name" required placeholder="Enter your full name">
+<input type="text" id="name" placeholder="Enter your full name" required>
 
 <label>Phone Number</label>
-<input id="phone" required type="tel" placeholder="Your phone number">
+<input type="tel" id="phone" placeholder="Your phone number" required>
 
-<label>Seed Variety</label>
-<select id="variety">
+<label>Seed Class</label>
+<select id="seedClass" required>
+<option value="">Select seed class</option>
+<option value="C1">C1</option>
+<option value="C2">C2</option>
+</select>
+
+<label>Potato Variety</label>
+<select id="variety" required>
+<option value="">Select variety</option>
 <option>Unica</option>
 <option>Shangi</option>
 <option>Super Shangi</option>
@@ -93,104 +122,98 @@ Order today and enjoy countrywide delivery.</p>
 <option>Markies</option>
 </select>
 
-<label>Seed Class</label>
-<select id="seedclass">
-<option>C1</option>
-<option>C2</option>
-</select>
-
-<label>Number of 50 kg Bags</label>
-<input id="bags" type="number" min="1" value="1" required>
+<label>Number of 50kg Bags</label>
+<input type="number" id="bags" min="1" value="1" required>
 
 <label>Delivery Location</label>
-<input id="location" required placeholder="County, town or village">
+<input type="text" id="location" placeholder="Town, county or delivery point" required>
 
-<label>M-Pesa Transaction Code</label>
-<input id="reference" placeholder="Enter payment code">
+<label>Additional Instructions</label>
+<textarea id="notes" rows="3" placeholder="Any additional information (optional)"></textarea>
 
 <div class="total">
-Total Amount: KSh <span id="total">3,450</span>
+Estimated Total: KSh <span id="total">3,450</span>
 </div>
 
-<button class="btn" type="submit" style="width:100%">
-SUBMIT ORDER VIA WHATSAPP
-</button>
+<button type="submit">SEND ORDER VIA WHATSAPP</button>
 </form>
-</div>
 </section>
 
-<section>
+<section class="section">
 <h2>M-Pesa Payment Instructions</h2>
-<div class="payment">
-<strong>Payment Method:</strong> Safaricom M-Pesa Send Money<br>
-<strong>Phone Number:</strong> 0715171470<br>
-<strong>Account Name:</strong> NICKSON<br>
-<strong>Price:</strong> KSh 3,450 per 50 kg bag.
-<p>Pay the full amount and enter your M-Pesa transaction code in the order form. Orders are confirmed after manual payment verification.</p>
-</div>
+<p><strong>Payment Method:</strong> M-Pesa Send Money</p>
+<p><strong>Payment Number:</strong> 0715171470</p>
+<p><strong>Account Name:</strong> NICKSON</p>
+<p>Complete payment before your booking is confirmed. Send your payment confirmation for manual verification by our team.</p>
 </section>
 
-<section>
+<section class="section">
 <h2>Delivery Information</h2>
-<div class="card">
-<p>We deliver certified potato seeds countrywide.</p>
-<p>Contact our team to confirm your delivery location and schedule.</p>
-<p>All certified seed bags are supplied in sealed 50 kg packaging.</p>
-</div>
+<p>Countrywide delivery available.</p>
+<p>Contact our team to confirm delivery arrangements, transport charges and delivery schedules for your location.</p>
 </section>
 
-<section id="contact">
+<section class="contact" id="contact">
 <h2>Contact Kisima Certified Seeds</h2>
-<div class="card">
-<p><strong>Call:</strong> 0715171470</p>
-<p><strong>WhatsApp:</strong> 0717592943</p>
-<a class="btn" href="https://wa.me/254717592943">CHAT WITH US ON WHATSAPP</a>
-</div>
+<p>Call: 0715171470</p>
+<p>WhatsApp: 0717592943</p>
+<a class="btn" style="background:#25a65a" href="https://wa.me/254717592943">CHAT WITH US ON WHATSAPP</a>
+<a class="btn" style="background:#2469a5" href="tel:0715171470">CALL KISIMA</a>
 </section>
+
+</div>
 
 <footer>
 <strong>KISIMA CERTIFIED SEEDS</strong>
 <p>Quality Seeds. Better Harvests.</p>
-<p>Call: 0715171470</p>
-<p>WhatsApp: 0717592943</p>
-<p>Countrywide Delivery</p>
+<p>© 2026 Kisima Certified Seeds. All Rights Reserved.</p>
 </footer>
 
 <script>
-const bags=document.getElementById('bags');
-const total=document.getElementById('total');
-function calculate(){
-let n=Math.max(1,parseInt(bags.value)||1);
-total.textContent=(n*3450).toLocaleString('en-KE');
+const price = 3450;
+const bags = document.getElementById("bags");
+const total = document.getElementById("total");
+
+function updateTotal(){
+let quantity = Math.max(0,Number(bags.value)||0);
+total.textContent = (quantity*price).toLocaleString("en-KE");
 }
-bags.addEventListener('input',calculate);
+bags.addEventListener("input",updateTotal);
 
-document.getElementById('orderForm').addEventListener('submit',function(e){
+document.getElementById("orderForm").addEventListener("submit",function(e){
 e.preventDefault();
-let name=document.getElementById('name').value.trim();
-let phone=document.getElementById('phone').value.trim();
-let variety=document.getElementById('variety').value;
-let seedclass=document.getElementById('seedclass').value;
-let quantity=Math.max(1,parseInt(bags.value)||1);
-let location=document.getElementById('location').value.trim();
-let reference=document.getElementById('reference').value.trim();
-let amount=quantity*3450;
 
-let message=`KISIMA CERTIFIED SEEDS - NEW ORDER
-Name: ${name}
-Phone: ${phone}
-Variety: ${variety}
-Seed Class: ${seedclass}
-Bags: ${quantity}
-Packaging: 50 kg per bag
-Delivery Location: ${location}
-M-Pesa Reference: ${reference||"Pending"}
-Total: KSh ${amount.toLocaleString('en-KE')}
+const name=document.getElementById("name").value.trim();
+const phone=document.getElementById("phone").value.trim();
+const seedClass=document.getElementById("seedClass").value;
+const variety=document.getElementById("variety").value;
+const quantity=Number(bags.value);
+const location=document.getElementById("location").value.trim();
+const notes=document.getElementById("notes").value.trim();
 
-Please verify my payment and confirm my order.`;
+if(!name||!phone||!seedClass||!variety||!location||quantity<1){
+alert("Please complete all required fields.");
+return;
+}
 
-window.open('https://wa.me/254717592943?text='+encodeURIComponent(message),'_blank');
+const amount=quantity*price;
+
+const message=
+"NEW KISIMA CERTIFIED SEEDS ORDER\n\n"+
+"Name: "+name+"\n"+
+"Phone: "+phone+"\n"+
+"Seed Class: "+seedClass+"\n"+
+"Variety: "+variety+"\n"+
+"Number of Bags: "+quantity+"\n"+
+"Price per Bag: KSh "+price+"\n"+
+"Total: KSh "+amount.toLocaleString("en-KE")+"\n"+
+"Delivery Location: "+location+"\n"+
+"Additional Instructions: "+notes+"\n\n"+
+"Please confirm availability and delivery arrangements.";
+
+window.open("https://wa.me/254717592943?text="+encodeURIComponent(message),"_blank");
 });
+updateTotal();
 </script>
 
 </body>
