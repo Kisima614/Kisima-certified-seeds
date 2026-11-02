@@ -97,7 +97,10 @@ app.post('/api/orders', async (req,res) => {
       VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
       [id,customer,phone,location,seedClass,variety,bags,delivery,mpesa,notes,p.price,total]);
     res.status(201).json({id,total,unitPrice:p.price,paymentStatus:'Pending verification',message:'Order received. Payment is pending manual verification.'});
-  } catch { res.status(500).json({error:'Could not save order. Please try again or contact Kisima.'}); }
+  } catch (e) {
+  console.error('ORDER SAVE ERROR:', e.message);
+  res.status(500).json({error:'Could not save order. Please try again or contact Kisima.'});
+}
 });
 app.post('/api/orders/lookup', async (req,res) => {
   const phone=clean(req.body?.phone,40).replace(/\s/g,'');
