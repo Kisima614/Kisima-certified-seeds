@@ -24,12 +24,18 @@ app.use('/api/', rateLimit({ windowMs: 60_000, limit: 120, standardHeaders: true
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: process.env.DATABASE_SSL === 'false' ? false : { rejectUnauthorized: false }
-});
+}
 const seed = [
-  ['Unica Size 1',3750,true],['Unica Size 2',3450,true],['Shangi',3750,true],
-  ['Super Shangi',3750,true],['Dutch',3750,true],['Wanjiku',3750,true],
-  ['Stephen',3750,false],['Sheherekea',3750,false]
+  ['Unica',3750,true],
+  ['Shangi',3750,true],
+  ['Super Shangi',3750,true],
+  ['White Shangi',3750,true],
+  ['Dutch',3750,true],
+  ['Sheherekea',3750,true],
+  ['Stephen',3750,true],
+  ['Markies',3750,true]
 ];
+
 async function init() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS products (
@@ -45,8 +51,13 @@ async function init() {
     );
   `);
   for (const [name,price,available] of seed) {
-    await pool.query('INSERT INTO products(name,price,available) VALUES($1,$2,$3) ON CONFLICT(name) DO NOTHING',[name,price,available]);
-  }
+   await pool.query(`INSERT INTO
+products(name,price,available)
+VALUES($1,$2,$3) ON
+CONFLICT(name) DO UPDATE SET
+price = EXCLUDED.price,
+available = EXCLUDED.available`,
+[name,price,available]);
 }
 const adminHash = bcrypt.hashSync(process.env.ADMIN_PASSWORD, 12);
 function auth(req,res,next) {
