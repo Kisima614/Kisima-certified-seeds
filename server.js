@@ -58,7 +58,9 @@ CONFLICT(name) DO UPDATE SET
 price = EXCLUDED.price,
 available = EXCLUDED.available`,
 [name,price,available]);
+  }
 }
+
 const adminHash = bcrypt.hashSync(process.env.ADMIN_PASSWORD, 12);
 function auth(req,res,next) {
   const token = (req.headers.authorization || '').replace(/^Bearer\s+/i,'');
