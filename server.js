@@ -70,7 +70,7 @@ app.post('/api/orders', async (req,res) => {
   const b=req.body || {};
   const customer=clean(b.customer,100), phone=clean(b.phone,40), location=clean(b.location,220);
   const variety=clean(b.variety,100), seedClass=clean(b.seedClass,50), delivery=clean(b.delivery,100);
-  const mpesa=clean(b.mpesaRef,40).toUpperCase(), notes=clean(b.notes,500);
+  const mpesa=clean(b.mpesa,40).toUpperCase(), notes=clean(b.notes,500);
   const bags=Number(b.bags);
   if (!customer || !phone || !location || !variety || !seedClass || !delivery || !mpesa || !Number.isInteger(bags) || bags<1 || bags>500)
     return res.status(400).json({error:'Please complete all required fields with a valid bag quantity.'});
