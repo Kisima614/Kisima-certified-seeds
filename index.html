@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,229 +27,206 @@ label{display:block;margin-top:13px;font-weight:bold}
 input,select,textarea{width:100%;padding:13px;margin-top:5px;border:1px solid #ccc;border-radius:7px;font-size:16px;background:white}
 button,.btn{display:block;width:100%;padding:14px;margin-top:15px;background:#174d32;color:white;border:0;border-radius:8px;font-size:17px;font-weight:bold;text-align:center;text-decoration:none;cursor:pointer}
 button:hover,.btn:hover{background:#103b26}
+button:disabled{opacity:.6;cursor:wait}
 .total{background:#edf5eb;padding:15px;margin-top:15px;border-radius:8px;font-size:20px;font-weight:bold}
 .contact{background:#174d32;color:white;text-align:center;padding:25px;border-radius:10px}
 .contact h2{color:white}
 footer{background:#103b26;color:white;text-align:center;padding:20px;margin-top:25px}
 .small{font-size:13px;color:#666}
+.status{padding:12px;border-radius:8px;background:#edf5eb;margin-top:14px;display:none}
 </style>
 </head>
 <body>
-
 <header>
 <div class="logo">🌱</div>
 <h1>KISIMA CERTIFIED SEEDS</h1>
 <p>Quality Potato Seeds for Better Harvests</p>
 <p>Certified and approved seed varieties</p>
 </header>
-
 <nav>
-<a href="#home">Home</a>
-<a href="#varieties">Varieties</a>
-<a href="#prices">Prices</a>
-<a href="#order">Order</a>
-<a href="#contact">Contact</a>
+<a href="#home">Home</a><a href="#varieties">Varieties</a><a href="#prices">Prices</a><a href="#order">Order</a><a href="#contact">Contact</a>
 </nav>
-
 <section class="hero" id="home">
 <h2>Welcome to Kisima Certified Seeds</h2>
 <p>Your trusted source for quality certified potato seeds.</p>
 <p>Order your preferred variety and arrange delivery to your location.</p>
 <a class="btn" href="#order">ORDER YOUR SEEDS NOW</a>
 </section>
-
 <div class="container">
-
 <section class="section" id="varieties">
 <h2>Our Potato Seed Varieties</h2>
 <div class="products">
-<div class="product">🥔<br>Unica</div>
-<div class="product">🥔<br>Shangi</div>
-<div class="product">🥔<br>Super Shangi</div>
-<div class="product">🥔<br>White Shangi</div>
-<div class="product">🥔<br>Dutch</div>
-<div class="product">🥔<br>Sheherekea</div>
-<div class="product">🥔<br>Stephen</div>
-<div class="product">🥔<br>Markies</div>
+<div class="product">🥔<br>Unica</div><div class="product">🥔<br>Shangi</div>
+<div class="product">🥔<br>Super Shangi</div><div class="product">🥔<br>White Shangi</div>
+<div class="product">🥔<br>Dutch</div><div class="product">🥔<br>Sheherekea</div>
+<div class="product">🥔<br>Stephen</div><div class="product">🥔<br>Markies</div>
 </div>
 </section>
-
 <section class="section" id="prices">
 <h2>Seed Prices</h2>
-<p>All prices are per 50kg bag.</p>
+<p>All prices are per 50kg bag. The checkout uses the current price stored by Kisima.</p>
 <div class="products">
-<div class="product">
-C1 Seed
-<div class="price">KSh 3,450</div>
-</div>
-<div class="product">
-C2 Seed
-<div class="price">KSh 3,450</div>
-</div>
+<div class="product">Potato seed<div class="price">Price shown at checkout</div></div>
 </div>
 <p class="small">All seed bags are supplied in certified 50kg packaging.</p>
 </section>
-
 <section class="section" id="order">
 <h2>Place Your Order</h2>
-<p>Complete the form below to send your order directly to Kisima through WhatsApp.</p>
-
+<p>Enter your details and choose M-Pesa STK Push to receive a payment prompt on your phone. Manual payment reference remains available.</p>
 <form id="orderForm">
-<label>Full Name</label>
-<input type="text" id="name" placeholder="Enter your full name" required>
-
-<label>Phone Number</label>
-<input type="tel" id="phone" placeholder="Your phone number" required>
-
+<label>Full Name</label><input type="text" id="name" placeholder="Enter your full name" required>
+<label>Phone Number for M-Pesa</label><input type="tel" id="phone" placeholder="07XXXXXXXX or 2547XXXXXXXX" required>
 <label>Seed Class</label>
 <select id="seedClass" required>
-<option value="">Select seed class</option>
-<option value="C1">C1</option>
-<option value="C2">C2</option>
+<option value="">Select seed class</option><option value="C1">C1</option><option value="C2">C2</option>
 </select>
-
 <label>Potato Variety</label>
-<select id="variety" required>
-<option value="">Select variety</option>
-<option>Unica</option>
-<option>Shangi</option>
-<option>Super Shangi</option>
-<option>White Shangi</option>
-<option>Dutch</option>
-<option>Sheherekea</option>
-<option>Stephen</option>
-<option>Markies</option>
+<select id="variety" required><option value="">Select variety</option>
+<option>Unica</option><option>Shangi</option><option>Super Shangi</option><option>White Shangi</option>
+<option>Dutch</option><option>Sheherekea</option><option>Stephen</option><option>Markies</option>
 </select>
-
-<label>Number of 50kg Bags</label>
-<input type="number" id="bags" min="1" value="1" required>
-
-<label>Delivery Location</label>
-<input type="text" id="location" placeholder="Town, county or delivery point" required>
-
+<label>Number of 50kg Bags</label><input type="number" id="bags" min="1" max="500" value="1" required>
+<label>Delivery Location</label><input type="text" id="location" placeholder="Town, county or delivery point" required>
 <label>Delivery Method</label>
-<select id="delivery" required>
-<option value="">Select delivery method</option>
-<option value="Delivery">Delivery</option>
-<option value="Collection">Collection</option>
+<select id="delivery" required><option value="">Select delivery method</option><option value="Delivery">Delivery</option><option value="Collection">Collection</option></select>
+<label>Payment Method</label>
+<select id="paymentMethod" required>
+<option value="stk">M-Pesa STK Push (payment prompt)</option>
+<option value="manual">I have already paid manually</option>
 </select>
-
-<label>M-Pesa Transaction Code</label>
-<input type="text" id="mpesa" placeholder="Enter M-Pesa code">
-
-<label>Additional Instructions</label>
-<textarea id="notes" rows="3" placeholder="Any additional information (optional)"></textarea>
-
-<div class="total">
-Estimated Total: KSh <span id="total">3,450</span>
+<div id="manualReference" style="display:none">
+<label>M-Pesa Transaction Code</label><input type="text" id="mpesa" placeholder="Enter M-Pesa code">
 </div>
-
-<button type="submit">SUBMIT ORDER</button>
+<label>Additional Instructions</label><textarea id="notes" rows="3" placeholder="Any additional information (optional)"></textarea>
+<div class="total">Estimated Total: KSh <span id="total">Loading...</span></div>
+<div id="status" class="status" role="status" aria-live="polite"></div>
+<button type="submit" id="submitButton">SEND M-PESA PAYMENT PROMPT</button>
 </form>
 </section>
-
 <section class="section">
-<h2>M-Pesa Payment Instructions</h2>
-<p><strong>Payment Method:</strong> M-Pesa Send Money</p>
-<p><strong>Payment Number:</strong> 0715171470</p>
-<p><strong>Account Name:</strong> NICKSON</p>
-<p>Complete payment before your booking is confirmed. Send your payment confirmation for manual verification by our team.</p>
+<h2>M-Pesa Payment Information</h2>
+<p>For manual payment instructions, please contact Kisima Certified Seeds directly.</p>
+<p>Payments are subject to verification by our team.</p>
+<p class="small">STK Push is currently in Sandbox testing and does not collect real customer payments.</p>
 </section>
-
 <section class="section">
 <h2>Delivery Information</h2>
 <p>Countrywide delivery available.</p>
 <p>Contact our team to confirm delivery arrangements, transport charges and delivery schedules for your location.</p>
 </section>
-
 <section class="contact" id="contact">
 <h2>Contact Kisima Certified Seeds</h2>
-<p>Call: 0715171470</p>
-<p>WhatsApp: 0717592943</p>
+<p>Call: 0715171470</p><p>WhatsApp: 0717592943</p>
 <a class="btn" style="background:#25a65a" href="https://wa.me/254717592943">CHAT WITH US ON WHATSAPP</a>
 <a class="btn" style="background:#2469a5" href="tel:0715171470">CALL KISIMA</a>
 </section>
-
 </div>
-
-<footer>
-<strong>KISIMA CERTIFIED SEEDS</strong>
-<p>Quality Seeds. Better Harvests.</p>
-<p>© 2026 Kisima Certified Seeds. All Rights Reserved.</p>
-</footer>
-
+<footer><strong>KISIMA CERTIFIED SEEDS</strong><p>Quality Seeds. Better Harvests.</p><p>© 2026 Kisima Certified Seeds. All Rights Reserved.</p></footer>
 <script>
-const price = 3450;
-const bags = document.getElementById("bags");
-const total = document.getElementById("total");
+const bagsInput=document.getElementById('bags');
+const totalEl=document.getElementById('total');
+const varietyEl=document.getElementById('variety');
+const paymentMethod=document.getElementById('paymentMethod');
+const manualReference=document.getElementById('manualReference');
+const mpesaInput=document.getElementById('mpesa');
+const statusEl=document.getElementById('status');
+const submitButton=document.getElementById('submitButton');
+let currentUnitPrice=null;
 
+async function loadProducts(){
+  try{
+    const response=await fetch('/api/products');
+    if(!response.ok) throw new Error('Could not load current prices.');
+    const products=await response.json();
+    const selected=products.find(p=>p.name===varietyEl.value);
+    currentUnitPrice=selected ? Number(selected.price) : null;
+    updateTotal();
+  }catch(e){totalEl.textContent='Check at checkout';}
+}
 function updateTotal(){
-let quantity = Math.max(0,Number(bags.value)||0);
-total.textContent = (quantity*price).toLocaleString("en-KE");
+  const quantity=Math.max(0,Number(bagsInput.value)||0);
+  const productPrice=currentUnitPrice;
+  totalEl.textContent=productPrice===null?'Select variety':(quantity*productPrice).toLocaleString('en-KE');
 }
-bags.addEventListener("input",updateTotal);
-
-document.getElementById("orderForm").addEventListener("submit",function(e){
-e.preventDefault();
-
-const name=document.getElementById("name").value.trim();
-const phone=document.getElementById("phone").value.trim();
-const seedClass=document.getElementById("seedClass").value;
-const variety=document.getElementById("variety").value;
-const quantity=Number(document.getElementById("bags").value);
-const location=document.getElementById("location").value.trim();
-const notes=document.getElementById("notes").value.trim();
-
-alert("Name:"+name+" Phone:"+phone+" Seed:"+seedClass+" Variety:"+variety+" Bags:"+quantity+" Location:"+location);
-
-if(!name||!phone||!seedClass||!variety||!location||quantity<1){
-alert("Please complete all required fields.");
-return;
+function showStatus(message){
+  statusEl.textContent=message;
+  statusEl.style.display='block';
 }
+function setPaymentMode(){
+  const manual=paymentMethod.value==='manual';
+  manualReference.style.display=manual?'block':'none';
+  mpesaInput.required=manual;
+  submitButton.textContent=manual?'SUBMIT MANUAL PAYMENT FOR VERIFICATION':'SEND M-PESA PAYMENT PROMPT';
+}
+varietyEl.addEventListener('change',loadProducts);
+bagsInput.addEventListener('input',updateTotal);
+paymentMethod.addEventListener('change',setPaymentMode);
+setPaymentMode();
+loadProducts();
 
-const amount=quantity*price;
-
-const message=
-"NEW KISIMA CERTIFIED SEEDS ORDER\n\n"+
-"Name: "+name+"\n"+
-"Phone: "+phone+"\n"+
-"Seed Class: "+seedClass+"\n"+
-"Variety: "+variety+"\n"+
-"Number of Bags: "+quantity+"\n"+
-"Price per Bag: KSh "+price+"\n"+
-"Total: KSh "+amount.toLocaleString("en-KE")+"\n"+
-"Delivery Location: "+location+"\n"+
-"Additional Instructions: "+notes+"\n\n"+
-"Please confirm availability and delivery arrangements.";
-
-fetch('/api/orders', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({
-    customer: name,
-    phone: phone,
-    location: location,
-    seedClass: seedClass,
-    variety: variety,
-    bags: quantity,
-    delivery: document.getElementById('delivery').value,
-    mpesa: document.getElementById('mpesa').value.trim(),
-    notes: notes
-  })
-})
-.then(async response => {
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.error || 'Order failed');
-  alert('Your order has been submitted successfully! Order ID: ' + data.id);
-  document.querySelector('form').reset();
-  updateTotal();
-})
-.catch(error => alert(error.message));
+document.getElementById('orderForm').addEventListener('submit',async function(e){
+  e.preventDefault();
+  const payload={
+    customer:document.getElementById('name').value.trim(),
+    phone:document.getElementById('phone').value.trim(),
+    seedClass:document.getElementById('seedClass').value,
+    variety:varietyEl.value,
+    bags:Number(bagsInput.value),
+    location:document.getElementById('location').value.trim(),
+    delivery:document.getElementById('delivery').value,
+    notes:document.getElementById('notes').value.trim(),
+    mpesa:mpesaInput.value.trim()
+  };
+  if(!payload.customer||!payload.phone||!payload.seedClass||!payload.variety||!payload.location||
+     !payload.delivery||!Number.isInteger(payload.bags)||payload.bags<1||payload.bags>500){
+    showStatus('Please complete all required fields correctly.');return;
+  }
+  const isManual=paymentMethod.value==='manual';
+  if(isManual&&!/^[A-Za-z0-9]{8,15}$/.test(payload.mpesa)){
+    showStatus('Enter a valid M-Pesa transaction code.');return;
+  }
+  submitButton.disabled=true;
+  showStatus(isManual?'Submitting your order for manual payment verification...':'Creating your order and requesting an M-Pesa prompt...');
+  try{
+    const response=await fetch(isManual?'/api/orders':'/api/orders/stk',{
+      method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)
+    });
+    const data=await response.json();
+    if(!response.ok) throw new Error(data.error||'Order submission failed.');
+    if(isManual){
+      showStatus(`Order ${data.id} received. Total: KSh ${Number(data.total).toLocaleString('en-KE')}. Payment is pending manual verification.`);
+      this.reset();setPaymentMode();loadProducts();
+      return;
+    }
+    showStatus(`Order ${data.id} created. Total: KSh ${Number(data.total).toLocaleString('en-KE')}. ${data.message} Keep your phone nearby.`);
+    const orderId=data.id;
+    let attempts=0;
+    const timer=setInterval(async()=>{
+      attempts++;
+      try{
+        const check=await fetch('/api/orders/'+encodeURIComponent(orderId)+'/payment');
+        const state=await check.json();
+        if(state.paymentStatus==='Verified'){
+          clearInterval(timer);
+          showStatus(`Payment confirmed! Order ${orderId} is PAID. M-Pesa receipt: ${state.receipt||'recorded'}.`);
+          document.getElementById('orderForm').reset();setPaymentMode();loadProducts();
+          submitButton.disabled=false;
+        }else if(state.paymentStatus==='Rejected'){
+          clearInterval(timer);
+          showStatus(`The payment was not completed for order ${orderId}. You can try again or contact Kisima for manual payment options.`);
+          submitButton.disabled=false;
+        }else if(attempts>=24){
+          clearInterval(timer);
+          showStatus(`Order ${orderId} is awaiting M-Pesa confirmation. If you entered your PIN, please wait and check your order status or contact Kisima. Do not submit the order again.`);
+          submitButton.disabled=false;
+        }
+      }catch(_){}
+    },5000);
+  }catch(error){
+    showStatus(error.message);
+    submitButton.disabled=false;
+  }
 });
-updateTotal();
 </script>
-
 </body>
 </html>
