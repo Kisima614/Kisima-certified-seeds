@@ -125,5 +125,5 @@ app.patch('/api/admin/products/:id',auth,async (req,res) => {
   try { const r=await pool.query('UPDATE products SET price=$2,available=$3,updated_at=NOW() WHERE id=$1 RETURNING id,name,price,available',[req.params.id,price,available]); if(!r.rowCount)return res.status(404).json({error:'Product not found.'}); res.json(r.rows[0]); }
   catch { res.status(500).json({error:'Could not update product.'}); }
 });
-app.get('/{*splat}',(_req,res)=>res.sendFile(path.join(__dirname,'index.html')));
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 init().then(()=>app.listen(process.env.PORT||3000,'0.0.0.0',()=>console.log('Kisima app running'))).catch(e=>{console.error('Database initialization failed',e.message);process.exit(1);});
