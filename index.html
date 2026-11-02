@@ -211,7 +211,31 @@ const message=
 "Additional Instructions: "+notes+"\n\n"+
 "Please confirm availability and delivery arrangements.";
 
-window.open("https://wa.me/254717592943?text="+encodeURIComponent(message),"_blank");
+fetch('/api/orders', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    customer: name,
+    phone: phone,
+    location: location,
+    seedClass: seedClass,
+    variety: variety,
+    bags: quantity,
+    delivery: document.getElementById('delivery').value,
+    mpesa: document.getElementById('mpesa').value.trim(),
+    notes: notes
+  })
+})
+.then(async response => {
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || 'Order failed');
+  alert('Your order has been submitted successfully! Order ID: ' + data.id);
+  document.querySelector('form').reset();
+  updateTotal();
+})
+.catch(error => alert(error.message));
 });
 updateTotal();
 </script>
