@@ -201,6 +201,8 @@ const quantity=Number(document.getElementById("bags").value);
 const location=document.getElementById("location").value.trim();
 const notes=document.getElementById("notes").value.trim();
 
+alert("Name:"+name+" Phone:"+phone+" Seed:"+seedClass+" Variety:"+variety+" Bags:"+quantity+" Location:"+location);
+
 if(!name||!phone||!seedClass||!variety||!location||quantity<1){
 alert("Please complete all required fields.");
 return;
