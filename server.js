@@ -24,7 +24,7 @@ app.use('/api/', rateLimit({ windowMs: 60_000, limit: 120, standardHeaders: true
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: process.env.DATABASE_SSL === 'false' ? false : { rejectUnauthorized: false }
-}
+});
 const seed = [
   ['Unica',3750,true],
   ['Shangi',3750,true],
