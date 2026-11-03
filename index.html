@@ -6,30 +6,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#174d32">
 <title>Kisima Certified Seeds | Quality Potato Seeds</title>
-
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial,sans-serif;background:#f5f8f4;color:#183326;line-height:1.6}
 header{background:#174d32;color:white;text-align:center;padding:28px 15px}
 header h1{margin:8px 0;font-size:28px}
-header p{margin:5px}
 .logo{font-size:45px}
 nav{background:#103b26;padding:13px;text-align:center;position:sticky;top:0;z-index:5}
 nav a{color:white;text-decoration:none;margin:0 10px;font-size:14px}
 .hero{padding:45px 20px;text-align:center;background:linear-gradient(135deg,#e2efdf,#c4dfc0)}
 .hero h2{font-size:30px;color:#174d32}
-.hero p{font-size:17px}
 .container{max-width:950px;margin:auto;padding:22px}
 .section{background:white;padding:22px;margin:20px 0;border-radius:12px;box-shadow:0 2px 10px #00000010}
 h2{color:#174d32}
 .products{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
 .product{background:#edf5eb;padding:15px;border-radius:10px;text-align:center;font-weight:bold}
-.price{font-size:20px;color:#174d32}
 label{display:block;margin-top:13px;font-weight:bold}
 input,select,textarea{width:100%;padding:13px;margin-top:5px;border:1px solid #ccc;border-radius:7px;font-size:16px;background:white}
 button,.btn{display:block;width:100%;padding:14px;margin-top:15px;background:#174d32;color:white;border:0;border-radius:8px;font-size:17px;font-weight:bold;text-align:center;text-decoration:none;cursor:pointer}
-button:hover,.btn:hover{background:#103b26}
-button:disabled{opacity:.6;cursor:wait}
+button:disabled{opacity:.6}
 .total{background:#edf5eb;padding:15px;margin-top:15px;border-radius:8px;font-size:20px;font-weight:bold}
 .contact{background:#174d32;color:white;text-align:center;padding:25px;border-radius:10px}
 .contact h2{color:white}
@@ -37,9 +32,11 @@ footer{background:#103b26;color:white;text-align:center;padding:20px;margin-top:
 .small{font-size:13px;color:#666}
 .status{padding:12px;border-radius:8px;background:#edf5eb;margin-top:14px;display:none;overflow-wrap:anywhere}
 .payment-note{background:#edf5eb;padding:12px;border-radius:8px;margin-top:12px}
+table{width:100%;border-collapse:collapse;margin-top:15px}
+th,td{padding:11px;border:1px solid #dce6dc;text-align:center}
+th{background:#174d32;color:white}
 </style>
 </head>
-
 <body>
 
 <header>
@@ -82,21 +79,24 @@ footer{background:#103b26;color:white;text-align:center;padding:20px;margin-top:
 
 <section class="section" id="prices">
 <h2>Seed Prices</h2>
-<p>All prices are per 50kg bag. The checkout uses the current price stored by Kisima.</p>
-<div class="products">
-<div class="product">
-Potato seed
-<div class="price">Price shown at checkout</div>
-</div>
-</div>
+<p>All prices are per 50kg bag. Same prices apply to Size 1 and Size 2.</p>
+<table>
+<thead>
+<tr><th>Seed Class</th><th>Size 1</th><th>Size 2</th></tr>
+</thead>
+<tbody>
+<tr><td>Generation 1 (C1)</td><td>KSh 3,750</td><td>KSh 3,750</td></tr>
+<tr><td>Generation 2 (C2)</td><td>KSh 3,450</td><td>KSh 3,450</td></tr>
+<tr><td>Basic</td><td>KSh 4,350</td><td>KSh 4,350</td></tr>
+<tr><td>Prebasic</td><td>KSh 4,750</td><td>KSh 4,750</td></tr>
+</tbody>
+</table>
 <p class="small">All seed bags are supplied in certified 50kg packaging.</p>
 </section>
 
 <section class="section" id="order">
-
 <h2>Place Your Order</h2>
-
-<p>Enter your details, then choose Paystack M-Pesa or manual M-Pesa payment.</p>
+<p>Select your preferred variety, seed class and potato size.</p>
 
 <form id="orderForm">
 
@@ -112,11 +112,17 @@ Potato seed
 <label>Seed Class</label>
 <select id="seedClass" required>
 <option value="">Select seed class</option>
-<option value="C1">C1</option>
-<option value="C2">C2</option>
-<option value="Generation 1">Generation 1</option>
+<option value="C1">Generation 1 (C1)</option>
+<option value="C2">Generation 2 (C2)</option>
 <option value="Basic">Basic</option>
 <option value="Prebasic">Prebasic</option>
+</select>
+
+<label>Potato Size</label>
+<select id="potatoSize" required>
+<option value="">Select potato size</option>
+<option value="Size 1">Size 1</option>
+<option value="Size 2">Size 2</option>
 </select>
 
 <label>Potato Variety</label>
@@ -165,13 +171,11 @@ Potato seed
 <textarea id="notes" rows="3" placeholder="Any additional information (optional)"></textarea>
 
 <div class="total">
-Estimated Total: KSh <span id="total">Loading...</span>
+Estimated Total: KSh <span id="total">Select seed class</span>
 </div>
 
 <div id="status" class="status" role="status" aria-live="polite"></div>
-
 <button type="submit" id="submitButton">PAY WITH M-PESA</button>
-
 </form>
 </section>
 
@@ -185,7 +189,7 @@ Estimated Total: KSh <span id="total">Loading...</span>
 <section class="section">
 <h2>Delivery Information</h2>
 <p>Countrywide delivery available.</p>
-<p>Contact our team to confirm delivery arrangements, transport charges and delivery schedules for your location.</p>
+<p>Contact our team to confirm delivery arrangements, transport charges and schedules.</p>
 </section>
 
 <section class="contact" id="contact">
@@ -195,7 +199,6 @@ Estimated Total: KSh <span id="total">Loading...</span>
 <a class="btn" style="background:#25a65a" href="https://wa.me/254717592943">CHAT WITH US ON WHATSAPP</a>
 <a class="btn" style="background:#2469a5" href="tel:0715171470">CALL KISIMA</a>
 </section>
-
 </div>
 
 <footer>
@@ -208,6 +211,7 @@ Estimated Total: KSh <span id="total">Loading...</span>
 const bagsInput = document.getElementById('bags');
 const totalEl = document.getElementById('total');
 const varietyEl = document.getElementById('variety');
+const seedClassEl = document.getElementById('seedClass');
 const paymentMethod = document.getElementById('paymentMethod');
 const manualReference = document.getElementById('manualReference');
 const paymentInfo = document.getElementById('paymentInfo');
@@ -216,35 +220,47 @@ const statusEl = document.getElementById('status');
 const submitButton = document.getElementById('submitButton');
 const orderForm = document.getElementById('orderForm');
 
-let currentUnitPrice = null;
+const classPrices = {
+  C1: 3750,
+  C2: 3450,
+  Basic: 4350,
+  Prebasic: 4750
+};
+
 let paymentTimer = null;
-
-async function loadProducts() {
-  try {
-    const response = await fetch('/api/products');
-    if (!response.ok) throw new Error('Could not load current prices.');
-
-    const products = await response.json();
-    const selected = products.find(p => p.name === varietyEl.value);
-
-    currentUnitPrice = selected ? Number(selected.price) : null;
-    updateTotal();
-  } catch (e) {
-    totalEl.textContent = 'Check at checkout';
-  }
-}
+let availableProducts = [];
 
 function updateTotal() {
-  const quantity = Math.max(0, Number(bagsInput.value) || 0);
+  const quantity = Number(bagsInput.value) || 0;
+  const price = classPrices[seedClassEl.value];
 
-  totalEl.textContent = currentUnitPrice === null
-    ? 'Select variety'
-    : (quantity * currentUnitPrice).toLocaleString('en-KE');
+  totalEl.textContent = price
+    ? (quantity * price).toLocaleString('en-KE')
+    : 'Select seed class';
 }
 
 function showStatus(message) {
   statusEl.textContent = message;
   statusEl.style.display = 'block';
+}
+
+async function loadProducts() {
+  try {
+    const response = await fetch('/api/products');
+    if (!response.ok) throw new Error('Could not load varieties.');
+
+    availableProducts = await response.json();
+
+    const selected = availableProducts.find(
+      p => p.name === varietyEl.value
+    );
+
+    if (varietyEl.value && (!selected || !selected.available)) {
+      showStatus('This variety is currently unavailable. Please contact Kisima.');
+    }
+  } catch (e) {
+    showStatus('Could not check variety availability. Please refresh the page.');
+  }
 }
 
 function setPaymentMode() {
@@ -262,7 +278,6 @@ function setPaymentMode() {
 function resetForm() {
   orderForm.reset();
   setPaymentMode();
-  currentUnitPrice = null;
   updateTotal();
   loadProducts();
 }
@@ -300,7 +315,7 @@ async function checkPayment(orderId) {
         paymentTimer = null;
 
         showStatus(
-          `Payment was not completed for order ${orderId}. Please contact Kisima before placing another order.`
+          `Payment was not completed for order ${orderId}. Please contact Kisima.`
         );
 
         submitButton.disabled = false;
@@ -324,11 +339,13 @@ async function checkPayment(orderId) {
   }, 5000);
 }
 
-varietyEl.addEventListener('change', loadProducts);
+seedClassEl.addEventListener('change', updateTotal);
 bagsInput.addEventListener('input', updateTotal);
+varietyEl.addEventListener('change', loadProducts);
 paymentMethod.addEventListener('change', setPaymentMode);
 
 setPaymentMode();
+updateTotal();
 loadProducts();
 
 orderForm.addEventListener('submit', async function(e) {
@@ -338,7 +355,8 @@ orderForm.addEventListener('submit', async function(e) {
     customer: document.getElementById('name').value.trim(),
     phone: document.getElementById('phone').value.trim(),
     email: document.getElementById('email').value.trim(),
-    seedClass: document.getElementById('seedClass').value,
+    seedClass: seedClassEl.value,
+    potatoSize: document.getElementById('potatoSize').value,
     variety: varietyEl.value,
     bags: Number(bagsInput.value),
     location: document.getElementById('location').value.trim(),
@@ -348,16 +366,11 @@ orderForm.addEventListener('submit', async function(e) {
   };
 
   if (
-    !payload.customer ||
-    !payload.phone ||
-    !payload.email ||
-    !payload.seedClass ||
-    !payload.variety ||
-    !payload.location ||
-    !payload.delivery ||
+    !payload.customer || !payload.phone || !payload.email ||
+    !payload.seedClass || !payload.potatoSize ||
+    !payload.variety || !payload.location || !payload.delivery ||
     !Number.isInteger(payload.bags) ||
-    payload.bags < 1 ||
-    payload.bags > 500
+    payload.bags < 1 || payload.bags > 500
   ) {
     showStatus('Please complete all required fields correctly.');
     return;
@@ -372,6 +385,15 @@ orderForm.addEventListener('submit', async function(e) {
 
   if (isManual && !/^[A-Za-z0-9]{8,15}$/.test(payload.mpesa)) {
     showStatus('Enter a valid M-Pesa transaction code.');
+    return;
+  }
+
+  const selected = availableProducts.find(
+    p => p.name === payload.variety
+  );
+
+  if (!selected || !selected.available) {
+    showStatus('This variety is unavailable. Please contact Kisima.');
     return;
   }
 
