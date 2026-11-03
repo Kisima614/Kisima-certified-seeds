@@ -4,10 +4,12 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const { Pool } = require('pg');
 const path = require('path');
 
 const required = ['DATABASE_URL', 'ADMIN_PASSWORD', 'JWT_SECRET'];
+
 for (const k of required) {
   if (!process.env[k]) {
     console.error(`Missing required environment variable: ${k}`);
@@ -15,16 +17,17 @@ for (const k of required) {
   }
 }
 
-if (process.env.NODE_ENV === 'production' && process.env.ADMIN_PASSWORD.length < 14) {
+if (process.env.NODE_ENV === 'production' &&
+    process.env.ADMIN_PASSWORD.length < 14) {
   console.error('ADMIN_PASSWORD must be at least 14 characters in production.');
   process.exit(1);
 }
 
 const app = express();
 app.set('trust proxy', 1);
+
 app.use(helmet({ contentSecurityPolicy: false }));
-app.use(express.json({ limit: '100kb' }));
-app.use(express.static(path.join(__dirname, 'public')));
+
 app.use('/api/', rateLimit({
   windowMs: 60000,
   limit: 120,
@@ -78,10 +81,10 @@ async function init() {
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
 
-    ALTER TABLE orders ADD COLUMN IF NOT EXISTS checkout_request_id TEXT;
-    ALTER TABLE orders ADD COLUMN IF NOT EXISTS merchant_request_id TEXT;
-    ALTER TABLE orders ADD COLUMN IF NOT EXISTS mpesa_receipt TEXT;
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS email TEXT NOT NULL DEFAULT '';
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS paystack_reference TEXT;
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_phone TEXT;
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS mpesa_receipt TEXT;
   `);
 
   for (const [name, price, available] of seed) {
@@ -127,79 +130,160 @@ function normalizeKenyanPhone(value) {
   return /^254[17]\d{8}$/.test(p) ? p : null;
 }
 
-function darajaConfig() {
-  const env = (process.env.DARAJA_ENV || 'sandbox').toLowerCase();
-
-  if (!['sandbox', 'production'].includes(env)) {
-    throw new Error('Invalid DARAJA_ENV');
-  }
-
-  const requiredKeys = [
-    'DARAJA_CONSUMER_KEY',
-    'DARAJA_CONSUMER_SECRET',
-    'DARAJA_SHORTCODE',
-    'DARAJA_PASSKEY'
-  ];
-
-  for (const k of requiredKeys) {
-    if (!process.env[k]) throw new Error(`Missing ${k}`);
-  }
-
-  const base = env === 'production'
-    ? 'https://api.safaricom.co.ke'
-    : 'https://sandbox.safaricom.co.ke';
-
-  const shortcode = process.env.DARAJA_SHORTCODE;
-
-  const callback = process.env.DARAJA_CALLBACK_URL ||
-    'https://kisima-certified-seeds.onrender.com/api/mpesa/callback';
-
-  if (!callback.startsWith('https://')) {
-    throw new Error('DARAJA_CALLBACK_URL must be HTTPS');
-  }
-
-  return {
-    base,
-    shortcode,
-    passkey: process.env.DARAJA_PASSKEY,
-    key: process.env.DARAJA_CONSUMER_KEY,
-    secret: process.env.DARAJA_CONSUMER_SECRET,
-    callback
-  };
-}
-
-async function darajaToken(cfg) {
-  const authHeader = Buffer
-    .from(`${cfg.key}:${cfg.secret}`)
-    .toString('base64');
-
-  const response = await fetch(
-    `${cfg.base}/oauth/v1/generate?grant_type=client_credentials`,
-    {
-      headers: {
-        Authorization: `Basic ${authHeader}`
-      }
-    }
-  );
-
-  const data = await response.json();
-
-  if (!response.ok || !data.access_token) {
-    console.error('Daraja token error:', data);
-    throw new Error(
-      'Could not authenticate with M-Pesa. Check Daraja credentials and app permissions.'
-    );
-  }
-
-  return data.access_token;
-}
-
 function makeOrderId() {
   return 'KS' +
     Date.now().toString().slice(-8) +
     Math.random().toString(36).slice(2, 6).toUpperCase();
 }
 
+function makePaystackReference() {
+  return 'KISIMA-' + crypto.randomBytes(12).toString('hex');
+}
+
+function paystackKey() {
+  const key = process.env.PAYSTACK_SECRET_KEY;
+  if (!key) throw new Error('Paystack secret key is not configured.');
+  return key;
+}
+
+async function paystackRequest(endpoint, options = {}) {
+  const response = await fetch(
+    `https://api.paystack.co${endpoint}`,
+    {
+      ...options,
+      headers: {
+        Authorization: `Bearer ${paystackKey()}`,
+        'Content-Type': 'application/json',
+        ...(options.headers || {})
+      }
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok || !data.status) {
+    console.error('Paystack API error:', data.message || 'Unknown error');
+    throw new Error(data.message || 'Paystack request failed.');
+  }
+
+  return data.data;
+}
+
+async function verifyPaystackPayment(reference, expectedTotal) {
+  const data = await paystackRequest(
+    `/transaction/verify/${encodeURIComponent(reference)}`
+  );
+
+  if (
+    data.status !== 'success' ||
+    data.currency !== 'KES' ||
+    Number(data.amount) !== Number(expectedTotal) * 100
+  ) {
+    return false;
+  }
+
+  return data;
+}
+
+async function markPaystackOrderPaid(reference, paymentData) {
+  const result = await pool.query(
+    `SELECT id, total, payment_status
+     FROM orders
+     WHERE paystack_reference = $1`,
+    [reference]
+  );
+
+  if (!result.rowCount) {
+    console.warn('Unknown Paystack reference:', reference);
+    return;
+  }
+
+  const order = result.rows[0];
+
+  if (order.payment_status === 'Verified') return;
+
+  const verified = await verifyPaystackPayment(
+    reference,
+    order.total
+  );
+
+  if (!verified) {
+    console.error('Paystack payment verification failed:', reference);
+    return;
+  }
+
+  await pool.query(
+    `UPDATE orders
+     SET payment_status = 'Verified',
+         mpesa_ref = $2,
+         mpesa_receipt = $2
+     WHERE id = $1
+       AND paystack_reference = $3
+       AND payment_status <> 'Verified'`,
+    [
+      order.id,
+      clean(paymentData?.receipt || reference, 40),
+      reference
+    ]
+  );
+
+  console.log('Paystack payment verified for order:', order.id);
+}
+
+/*
+  Paystack webhook.
+  This route must be registered BEFORE express.json()
+  so that the original request body can be verified.
+*/
+app.post(
+  '/api/paystack/webhook',
+  express.raw({ type: 'application/json' }),
+  async (req, res) => {
+    try {
+      const signature = req.headers['x-paystack-signature'];
+
+      if (!signature || !Buffer.isBuffer(req.body)) {
+        return res.sendStatus(400);
+      }
+
+      const expected = crypto
+        .createHmac('sha512', paystackKey())
+        .update(req.body)
+        .digest('hex');
+
+      const suppliedBuffer = Buffer.from(String(signature), 'hex');
+      const expectedBuffer = Buffer.from(expected, 'hex');
+
+      if (
+        suppliedBuffer.length !== expectedBuffer.length ||
+        !crypto.timingSafeEqual(suppliedBuffer, expectedBuffer)
+      ) {
+        console.warn('Invalid Paystack webhook signature.');
+        return res.sendStatus(401);
+      }
+
+      const event = JSON.parse(req.body.toString('utf8'));
+
+      if (event.event === 'charge.success' && event.data?.reference) {
+        await markPaystackOrderPaid(
+          event.data.reference,
+          event.data
+        );
+      }
+
+      return res.sendStatus(200);
+
+    } catch (e) {
+      console.error('Paystack webhook error:', e.message);
+      return res.sendStatus(500);
+    }
+  }
+);
+
+app.use(express.json({ limit: '100kb' }));
+app.use(express.static(path.join(__dirname, 'public')));
+
+/* Health check */
 app.get('/api/health', async (_req, res) => {
   try {
     await pool.query('SELECT 1');
@@ -209,6 +293,7 @@ app.get('/api/health', async (_req, res) => {
   }
 });
 
+/* Products and prices */
 app.get('/api/products', async (_req, res) => {
   try {
     const r = await pool.query(
@@ -226,6 +311,7 @@ app.post('/api/orders', async (req, res) => {
 
   const customer = clean(b.customer, 100);
   const phone = clean(b.phone, 40);
+  const email = clean(b.email, 200).toLowerCase();
   const location = clean(b.location, 220);
   const variety = clean(b.variety, 100);
   const seedClass = clean(b.seedClass, 50);
@@ -235,12 +321,13 @@ app.post('/api/orders', async (req, res) => {
   const bags = Number(b.bags);
 
   if (
-    !customer || !phone || !location || !variety ||
-    !seedClass || !delivery || !mpesa ||
+    !customer || !phone || !email || !location ||
+    !variety || !seedClass || !delivery || !mpesa ||
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
     !Number.isInteger(bags) || bags < 1 || bags > 500
   ) {
     return res.status(400).json({
-      error: 'Please complete all required fields with a valid bag quantity.'
+      error: 'Please complete all required fields correctly.'
     });
   }
 
@@ -268,12 +355,12 @@ app.post('/api/orders', async (req, res) => {
 
     await pool.query(
       `INSERT INTO orders
-       (id, customer, phone, location, seed_class, variety,
+       (id, customer, phone, email, location, seed_class, variety,
         bags, delivery, mpesa_ref, notes, unit_price, total)
        VALUES
-       ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
+       ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`,
       [
-        id, customer, phone, location, seedClass,
+        id, customer, phone, email, location, seedClass,
         variety, bags, delivery, mpesa, notes, p.price, total
       ]
     );
@@ -285,6 +372,7 @@ app.post('/api/orders', async (req, res) => {
       paymentStatus: 'Pending verification',
       message: 'Order received. Payment is pending manual verification.'
     });
+
   } catch (e) {
     console.error('ORDER SAVE ERROR:', e.message);
     res.status(500).json({
@@ -293,14 +381,15 @@ app.post('/api/orders', async (req, res) => {
   }
 });
 
-/* M-Pesa STK Push order */
-app.post('/api/orders/stk', async (req, res) => {
+/* Paystack M-Pesa payment */
+app.post('/api/orders/paystack', async (req, res) => {
   const b = req.body || {};
 
   const customer = clean(b.customer, 100);
   const phoneRaw = clean(b.phone, 40);
-  const location = clean(b.location, 220);
   const phone = normalizeKenyanPhone(phoneRaw);
+  const email = clean(b.email, 200).toLowerCase();
+  const location = clean(b.location, 220);
   const variety = clean(b.variety, 100);
   const seedClass = clean(b.seedClass, 50);
   const delivery = clean(b.delivery, 100);
@@ -308,22 +397,15 @@ app.post('/api/orders/stk', async (req, res) => {
   const bags = Number(b.bags);
 
   if (
-    !customer || !phone || !location || !variety ||
-    !seedClass || !delivery ||
+    !customer || !phone || !email || !location ||
+    !variety || !seedClass || !delivery ||
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
     !Number.isInteger(bags) || bags < 1 || bags > 500
   ) {
     return res.status(400).json({
-      error: 'Complete all fields and enter a valid Kenyan M-Pesa phone number.'
+      error: 'Complete all fields and enter a valid email and Kenyan M-Pesa phone number.'
     });
   }
-
-  if (!['C1', 'C2', 'Generation 1', 'Basic', 'Prebasic'].includes(seedClass)) {
-    return res.status(400).json({
-      error: 'Select a valid seed class.'
-    });
-  }
-
-  let orderId;
 
   try {
     const pr = await pool.query(
@@ -340,233 +422,79 @@ app.post('/api/orders/stk', async (req, res) => {
     const p = pr.rows[0];
     const total = p.price * bags;
 
-    if (!Number.isSafeInteger(total) || total < 1) {
-      return res.status(400).json({ error: 'Invalid order total.' });
-    }
-
-    orderId = makeOrderId();
-
-    await pool.query(
-      `INSERT INTO orders
-       (id, customer, phone, location, seed_class, variety,
-        bags, delivery, mpesa_ref, notes, unit_price, total,
-        payment_status, payment_phone)
-       VALUES
-       ($1,$2,$3,$4,$5,$6,$7,$8,'STK_PENDING',$9,$10,$11,
-        'Pending verification',$12)`,
-      [
-        orderId, customer, phoneRaw, location, seedClass,
-        variety, bags, delivery, notes, p.price, total, phone
-      ]
-    );
-
-    const cfg = darajaConfig();
-
-    if (cfg.base.includes('sandbox') && cfg.shortcode !== '174379') {
-      throw new Error('Sandbox testing must use shortcode 174379.');
-    }
-
-    const token = await darajaToken(cfg);
-
-    const parts = new Intl.DateTimeFormat('en-GB', {
-      timeZone: 'Africa/Nairobi',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hourCycle: 'h23'
-    }).formatToParts(new Date());
-
-    const part = Object.fromEntries(
-      parts.map(x => [x.type, x.value])
-    );
-
-    const timestamp =
-      part.year + part.month + part.day +
-      part.hour + part.minute + part.second;
-
-    const password = Buffer
-      .from(`${cfg.shortcode}${cfg.passkey}${timestamp}`)
-      .toString('base64');
-
-    const payload = {
-      BusinessShortCode: cfg.shortcode,
-      Password: password,
-      Timestamp: timestamp,
-      TransactionType: 'CustomerPayBillOnline',
-      Amount: Math.round(total),
-      PartyA: phone,
-      PartyB: cfg.shortcode,
-      PhoneNumber: phone,
-      CallBackURL: cfg.callback,
-      AccountReference: orderId,
-      TransactionDesc: `Kisima seed order ${orderId}`.slice(0, 100)
-    };
-
-    const response = await fetch(
-      `${cfg.base}/mpesa/stkpush/v1/processrequest`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      }
-    );
-
-    const data = await response.json();
-
     if (
-      !response.ok ||
-      data.ResponseCode !== '0' ||
-      !data.CheckoutRequestID
+      !Number.isSafeInteger(total) ||
+      total < 1 ||
+      total > 150000
     ) {
-      console.error('Daraja STK request failed:', data);
-
-      await pool.query(
-        `UPDATE orders
-         SET payment_status = 'Rejected',
-             notes = CONCAT(COALESCE(notes,''), $2)
-         WHERE id = $1`,
-        [orderId, ' | STK request could not be initiated.']
-      );
-
-      return res.status(502).json({
-        error: data.errorMessage ||
-          data.ResponseDescription ||
-          'M-Pesa could not start the payment prompt. Your order was saved; please contact Kisima.'
+      return res.status(400).json({
+        error: 'The order total must be between KSh 1 and KSh 150,000 for this M-Pesa payment.'
       });
     }
 
+    const id = makeOrderId();
+    const reference = makePaystackReference();
+
     await pool.query(
-      `UPDATE orders
-       SET checkout_request_id = $2,
-           merchant_request_id = $3
-       WHERE id = $1`,
+      `INSERT INTO orders
+       (id, customer, phone, email, location, seed_class, variety,
+        bags, delivery, notes, unit_price, total, payment_status,
+        payment_phone, paystack_reference)
+       VALUES
+       ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,
+        'Pending verification',$13,$14)`,
       [
-        orderId,
-        data.CheckoutRequestID,
-        data.MerchantRequestID || null
+        id, customer, phoneRaw, email, location, seedClass,
+        variety, bags, delivery, notes, p.price, total,
+        phone, reference
       ]
     );
 
-    res.status(202).json({
-      id: orderId,
-      total,
-      paymentStatus: 'Pending verification',
-      message: 'Payment prompt sent. Enter your M-Pesa PIN on your phone to complete payment.'
+    const charge = await paystackRequest('/charge', {
+      method: 'POST',
+      body: JSON.stringify({
+        email,
+        amount: String(total * 100),
+        currency: 'KES',
+        reference,
+        mobile_money: {
+          phone: '+' + phone,
+          provider: 'mpesa'
+        },
+        metadata: {
+          order_id: id,
+          business: 'Kisima Certified Seeds'
+        }
+      })
     });
-
-  } catch (e) {
-    console.error('STK INITIATION ERROR:', e.message);
-
-    if (orderId) {
-      try {
-        await pool.query(
-          `UPDATE orders
-           SET notes = CONCAT(COALESCE(notes,''), $2)
-           WHERE id = $1`,
-          [
-            orderId,
-            ' | STK initiation error; manual payment follow-up required.'
-          ]
-        );
-      } catch {}
-    }
-
-    res.status(500).json({
-      error: 'Could not start M-Pesa payment. Your order may have been saved; contact Kisima before placing it again.'
-    });
-  }
-});
-
-/* Safaricom payment callback */
-app.post('/api/mpesa/callback', async (req, res) => {
-  res.json({ ResultCode: 0, ResultDesc: 'Accepted' });
-
-  const cb = req.body?.Body?.stkCallback;
-  if (!cb?.CheckoutRequestID) return;
-
-  try {
-    const found = await pool.query(
-      `SELECT id, total, payment_phone, payment_status
-       FROM orders
-       WHERE checkout_request_id = $1`,
-      [cb.CheckoutRequestID]
-    );
-
-    if (!found.rowCount) {
-      console.warn(
-        'M-Pesa callback for unknown CheckoutRequestID:',
-        cb.CheckoutRequestID
-      );
-      return;
-    }
-
-    const order = found.rows[0];
-
-    if (order.payment_status === 'Verified') return;
-
-    if (Number(cb.ResultCode) !== 0) {
-      await pool.query(
-        `UPDATE orders
-         SET payment_status = 'Rejected'
-         WHERE id = $1 AND payment_status <> 'Verified'`,
-        [order.id]
-      );
-
-      console.log(
-        'STK payment failed for order',
-        order.id,
-        cb.ResultDesc
-      );
-      return;
-    }
-
-    const items = cb.CallbackMetadata?.Item || [];
-    const meta = {};
-
-    for (const item of items) {
-      if (item?.Name) meta[item.Name] = item.Value;
-    }
-
-    const paidAmount = Number(meta.Amount);
-    const receipt = clean(meta.MpesaReceiptNumber, 40);
-    const paidPhone = String(meta.PhoneNumber || '');
 
     if (
-      !receipt ||
-      paidAmount !== Number(order.total) ||
-      paidPhone !== String(order.payment_phone)
+      !charge.reference ||
+      !['pay_offline', 'pending', 'success'].includes(charge.status)
     ) {
-      console.error(
-        'M-Pesa callback did not match order amount/phone:',
-        order.id
+      throw new Error(
+        charge.display_text || 'Paystack could not start the M-Pesa payment.'
       );
-      return;
     }
 
-    await pool.query(
-      `UPDATE orders
-       SET payment_status = 'Verified',
-           mpesa_ref = $2,
-           mpesa_receipt = $2
-       WHERE id = $1 AND checkout_request_id = $3`,
-      [order.id, receipt, cb.CheckoutRequestID]
-    );
+    if (charge.status === 'success') {
+      await markPaystackOrderPaid(reference, charge);
+    }
 
-    console.log(
-      'M-Pesa payment verified for order',
-      order.id,
-      'receipt',
-      receipt
-    );
+    return res.status(202).json({
+      id,
+      reference,
+      total,
+      paymentStatus: 'Pending verification',
+      message: charge.display_text ||
+        'Check your phone and complete the M-Pesa payment prompt.'
+    });
 
   } catch (e) {
-    console.error('M-Pesa callback processing error:', e.message);
+    console.error('PAYSTACK INITIATION ERROR:', e.message);
+    return res.status(502).json({
+      error: 'Paystack could not start the M-Pesa payment. Please try again or contact Kisima.'
+    });
   }
 });
 
@@ -574,9 +502,10 @@ app.post('/api/mpesa/callback', async (req, res) => {
 app.get('/api/orders/:id/payment', async (req, res) => {
   try {
     const r = await pool.query(
-      `SELECT id,
+      `SELECT id, total,
               payment_status AS "paymentStatus",
-              mpesa_receipt AS receipt
+              mpesa_receipt AS receipt,
+              paystack_reference AS reference
        FROM orders
        WHERE id = $1`,
       [clean(req.params.id, 40)]
@@ -586,7 +515,43 @@ app.get('/api/orders/:id/payment', async (req, res) => {
       return res.status(404).json({ error: 'Order not found.' });
     }
 
-    res.json(r.rows[0]);
+    const order = r.rows[0];
+
+    if (
+      order.reference &&
+      order.paymentStatus !== 'Verified'
+    ) {
+      try {
+        const verified = await verifyPaystackPayment(
+          order.reference,
+          order.total
+        );
+
+        if (verified) {
+          await markPaystackOrderPaid(order.reference, verified);
+
+          const updated = await pool.query(
+            `SELECT payment_status AS "paymentStatus",
+                    mpesa_receipt AS receipt
+             FROM orders WHERE id = $1`,
+            [order.id]
+          );
+
+          return res.json({
+            id: order.id,
+            ...updated.rows[0]
+          });
+        }
+      } catch (e) {
+        console.error('Paystack status check:', e.message);
+      }
+    }
+
+    res.json({
+      id: order.id,
+      paymentStatus: order.paymentStatus,
+      receipt: order.receipt
+    });
 
   } catch {
     res.status(500).json({
@@ -655,7 +620,7 @@ app.post('/api/admin/login', async (req, res) => {
 app.get('/api/admin/orders', auth, async (_req, res) => {
   try {
     const r = await pool.query(
-      `SELECT id, customer, phone, location,
+      `SELECT id, customer, phone, email, location,
               seed_class AS "seedClass",
               variety, bags, delivery,
               mpesa_ref AS "mpesaRef",
