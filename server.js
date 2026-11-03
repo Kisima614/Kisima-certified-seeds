@@ -19,7 +19,7 @@ for (const k of required) {
 
 if (process.env.NODE_ENV === 'production' &&
     process.env.ADMIN_PASSWORD.length < 14) {
-  console.error('ADMIN_PASSWORD must be at least 14 characters in production.');
+  console.error('ADMIN_PASSWORD must be at least 14 characters.');
   process.exit(1);
 }
 
@@ -41,6 +41,14 @@ const pool = new Pool({
     ? false
     : { rejectUnauthorized: false }
 });
+
+// Prices are per 50kg bag.
+const CLASS_PRICES = {
+  C1: 3750,
+  C2: 3450,
+  Basic: 4350,
+  Prebasic: 4750
+};
 
 const seed = [
   ['Unica', 3750, true],
@@ -85,6 +93,7 @@ async function init() {
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS paystack_reference TEXT;
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_phone TEXT;
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS mpesa_receipt TEXT;
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS potato_size TEXT NOT NULL DEFAULT 'Size 1';
   `);
 
   for (const [name, price, available] of seed) {
@@ -92,8 +101,7 @@ async function init() {
       `INSERT INTO products(name, price, available)
        VALUES($1, $2, $3)
        ON CONFLICT(name) DO UPDATE
-       SET price = EXCLUDED.price,
-           available = EXCLUDED.available`,
+       SET available = EXCLUDED.available`,
       [name, price, available]
     );
   }
@@ -227,14 +235,10 @@ async function markPaystackOrderPaid(reference, paymentData) {
     ]
   );
 
-  console.log('Paystack payment verified for order:', order.id);
+  console.log('Paystack payment verified:', order.id);
 }
 
-/*
-  Paystack webhook.
-  This route must be registered BEFORE express.json()
-  so that the original request body can be verified.
-*/
+// Paystack webhook must come before express.json().
 app.post(
   '/api/paystack/webhook',
   express.raw({ type: 'application/json' }),
@@ -258,7 +262,6 @@ app.post(
         suppliedBuffer.length !== expectedBuffer.length ||
         !crypto.timingSafeEqual(suppliedBuffer, expectedBuffer)
       ) {
-        console.warn('Invalid Paystack webhook signature.');
         return res.sendStatus(401);
       }
 
@@ -272,7 +275,6 @@ app.post(
       }
 
       return res.sendStatus(200);
-
     } catch (e) {
       console.error('Paystack webhook error:', e.message);
       return res.sendStatus(500);
@@ -283,7 +285,6 @@ app.post(
 app.use(express.json({ limit: '100kb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-/* Health check */
 app.get('/api/health', async (_req, res) => {
   try {
     await pool.query('SELECT 1');
@@ -293,11 +294,11 @@ app.get('/api/health', async (_req, res) => {
   }
 });
 
-/* Products and prices */
+// Product list is used to check variety availability.
 app.get('/api/products', async (_req, res) => {
   try {
     const r = await pool.query(
-      'SELECT id, name, price, available FROM products ORDER BY id'
+      'SELECT id, name, available FROM products ORDER BY id'
     );
     res.json(r.rows);
   } catch {
@@ -305,31 +306,62 @@ app.get('/api/products', async (_req, res) => {
   }
 });
 
-/* Manual M-Pesa payment fallback */
-app.post('/api/orders', async (req, res) => {
-  const b = req.body || {};
-
+// Shared order validation and product availability.
+async function getOrderDetails(b) {
   const customer = clean(b.customer, 100);
   const phone = clean(b.phone, 40);
   const email = clean(b.email, 200).toLowerCase();
   const location = clean(b.location, 220);
   const variety = clean(b.variety, 100);
   const seedClass = clean(b.seedClass, 50);
+  const potatoSize = clean(b.potatoSize, 20);
   const delivery = clean(b.delivery, 100);
-  const mpesa = clean(b.mpesa, 40).toUpperCase();
   const notes = clean(b.notes, 500);
   const bags = Number(b.bags);
 
   if (
     !customer || !phone || !email || !location ||
-    !variety || !seedClass || !delivery || !mpesa ||
+    !variety || !seedClass || !potatoSize || !delivery ||
     !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
     !Number.isInteger(bags) || bags < 1 || bags > 500
   ) {
-    return res.status(400).json({
-      error: 'Please complete all required fields correctly.'
-    });
+    throw new Error('Please complete all required fields correctly.');
   }
+
+  if (!['Size 1', 'Size 2'].includes(potatoSize)) {
+    throw new Error('Please select Size 1 or Size 2.');
+  }
+
+  if (!Object.prototype.hasOwnProperty.call(CLASS_PRICES, seedClass)) {
+    throw new Error('Please select a valid seed class.');
+  }
+
+  const pr = await pool.query(
+    'SELECT name, available FROM products WHERE name = $1',
+    [variety]
+  );
+
+  if (!pr.rowCount || !pr.rows[0].available) {
+    throw new Error('This variety is not currently available. Please contact Kisima.');
+  }
+
+  const unitPrice = CLASS_PRICES[seedClass];
+  const total = unitPrice * bags;
+
+  if (!Number.isSafeInteger(total)) {
+    throw new Error('Invalid order total.');
+  }
+
+  return {
+    customer, phone, email, location, variety,
+    seedClass, potatoSize, delivery, notes,
+    bags, unitPrice, total
+  };
+}
+
+// Manual M-Pesa order.
+app.post('/api/orders', async (req, res) => {
+  const mpesa = clean(req.body?.mpesa, 40).toUpperCase();
 
   if (!/^[A-Z0-9]{8,15}$/.test(mpesa)) {
     return res.status(400).json({
@@ -338,95 +370,50 @@ app.post('/api/orders', async (req, res) => {
   }
 
   try {
-    const pr = await pool.query(
-      'SELECT name, price, available FROM products WHERE name = $1',
-      [variety]
-    );
-
-    if (!pr.rowCount || !pr.rows[0].available) {
-      return res.status(400).json({
-        error: 'This variety is not currently available to order. Please contact Kisima.'
-      });
-    }
-
-    const p = pr.rows[0];
+    const o = await getOrderDetails(req.body || {});
     const id = makeOrderId();
-    const total = p.price * bags;
 
     await pool.query(
       `INSERT INTO orders
-       (id, customer, phone, email, location, seed_class, variety,
-        bags, delivery, mpesa_ref, notes, unit_price, total)
+       (id, customer, phone, email, location, seed_class,
+        variety, potato_size, bags, delivery, mpesa_ref,
+        notes, unit_price, total)
        VALUES
-       ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`,
+       ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`,
       [
-        id, customer, phone, email, location, seedClass,
-        variety, bags, delivery, mpesa, notes, p.price, total
+        id, o.customer, o.phone, o.email, o.location,
+        o.seedClass, o.variety, o.potatoSize, o.bags,
+        o.delivery, mpesa, o.notes, o.unitPrice, o.total
       ]
     );
 
     res.status(201).json({
       id,
-      total,
-      unitPrice: p.price,
+      total: o.total,
+      unitPrice: o.unitPrice,
       paymentStatus: 'Pending verification',
       message: 'Order received. Payment is pending manual verification.'
     });
 
   } catch (e) {
     console.error('ORDER SAVE ERROR:', e.message);
-    res.status(500).json({
-      error: 'Could not save order. Please try again or contact Kisima.'
-    });
+    res.status(400).json({ error: e.message });
   }
 });
 
-/* Paystack M-Pesa payment */
+// Paystack M-Pesa order.
 app.post('/api/orders/paystack', async (req, res) => {
-  const b = req.body || {};
-
-  const customer = clean(b.customer, 100);
-  const phoneRaw = clean(b.phone, 40);
-  const phone = normalizeKenyanPhone(phoneRaw);
-  const email = clean(b.email, 200).toLowerCase();
-  const location = clean(b.location, 220);
-  const variety = clean(b.variety, 100);
-  const seedClass = clean(b.seedClass, 50);
-  const delivery = clean(b.delivery, 100);
-  const notes = clean(b.notes, 500);
-  const bags = Number(b.bags);
-
-  if (
-    !customer || !phone || !email || !location ||
-    !variety || !seedClass || !delivery ||
-    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
-    !Number.isInteger(bags) || bags < 1 || bags > 500
-  ) {
-    return res.status(400).json({
-      error: 'Complete all fields and enter a valid email and Kenyan M-Pesa phone number.'
-    });
-  }
-
   try {
-    const pr = await pool.query(
-      'SELECT name, price, available FROM products WHERE name = $1',
-      [variety]
-    );
+    const o = await getOrderDetails(req.body || {});
+    const phone = normalizeKenyanPhone(o.phone);
 
-    if (!pr.rowCount || !pr.rows[0].available) {
+    if (!phone) {
       return res.status(400).json({
-        error: 'This variety is not currently available. Please contact Kisima.'
+        error: 'Enter a valid Kenyan M-Pesa phone number.'
       });
     }
 
-    const p = pr.rows[0];
-    const total = p.price * bags;
-
-    if (
-      !Number.isSafeInteger(total) ||
-      total < 1 ||
-      total > 150000
-    ) {
+    if (o.total < 1 || o.total > 150000) {
       return res.status(400).json({
         error: 'The order total must be between KSh 1 and KSh 150,000 for this M-Pesa payment.'
       });
@@ -437,15 +424,17 @@ app.post('/api/orders/paystack', async (req, res) => {
 
     await pool.query(
       `INSERT INTO orders
-       (id, customer, phone, email, location, seed_class, variety,
-        bags, delivery, notes, unit_price, total, payment_status,
+       (id, customer, phone, email, location, seed_class,
+        variety, potato_size, bags, delivery, notes,
+        unit_price, total, payment_status,
         payment_phone, paystack_reference)
        VALUES
-       ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,
-        'Pending verification',$13,$14)`,
+       ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,
+        'Pending verification',$14,$15)`,
       [
-        id, customer, phoneRaw, email, location, seedClass,
-        variety, bags, delivery, notes, p.price, total,
+        id, o.customer, o.phone, o.email, o.location,
+        o.seedClass, o.variety, o.potatoSize, o.bags,
+        o.delivery, o.notes, o.unitPrice, o.total,
         phone, reference
       ]
     );
@@ -453,8 +442,8 @@ app.post('/api/orders/paystack', async (req, res) => {
     const charge = await paystackRequest('/charge', {
       method: 'POST',
       body: JSON.stringify({
-        email,
-        amount: String(total * 100),
+        email: o.email,
+        amount: String(o.total * 100),
         currency: 'KES',
         reference,
         mobile_money: {
@@ -472,9 +461,7 @@ app.post('/api/orders/paystack', async (req, res) => {
       !charge.reference ||
       !['pay_offline', 'pending', 'success'].includes(charge.status)
     ) {
-      throw new Error(
-        charge.display_text || 'Paystack could not start the M-Pesa payment.'
-      );
+      throw new Error('Paystack could not start the M-Pesa payment.');
     }
 
     if (charge.status === 'success') {
@@ -484,7 +471,7 @@ app.post('/api/orders/paystack', async (req, res) => {
     return res.status(202).json({
       id,
       reference,
-      total,
+      total: o.total,
       paymentStatus: 'Pending verification',
       message: charge.display_text ||
         'Check your phone and complete the M-Pesa payment prompt.'
@@ -492,13 +479,13 @@ app.post('/api/orders/paystack', async (req, res) => {
 
   } catch (e) {
     console.error('PAYSTACK INITIATION ERROR:', e.message);
-    return res.status(502).json({
-      error: 'Paystack could not start the M-Pesa payment. Please try again or contact Kisima.'
+    return res.status(400).json({
+      error: e.message || 'Paystack could not start payment.'
     });
   }
 });
 
-/* Customer payment status check */
+// Customer payment status.
 app.get('/api/orders/:id/payment', async (req, res) => {
   try {
     const r = await pool.query(
@@ -506,8 +493,7 @@ app.get('/api/orders/:id/payment', async (req, res) => {
               payment_status AS "paymentStatus",
               mpesa_receipt AS receipt,
               paystack_reference AS reference
-       FROM orders
-       WHERE id = $1`,
+       FROM orders WHERE id = $1`,
       [clean(req.params.id, 40)]
     );
 
@@ -517,10 +503,7 @@ app.get('/api/orders/:id/payment', async (req, res) => {
 
     const order = r.rows[0];
 
-    if (
-      order.reference &&
-      order.paymentStatus !== 'Verified'
-    ) {
+    if (order.reference && order.paymentStatus !== 'Verified') {
       try {
         const verified = await verifyPaystackPayment(
           order.reference,
@@ -537,10 +520,7 @@ app.get('/api/orders/:id/payment', async (req, res) => {
             [order.id]
           );
 
-          return res.json({
-            id: order.id,
-            ...updated.rows[0]
-          });
+          return res.json({ id: order.id, ...updated.rows[0] });
         }
       } catch (e) {
         console.error('Paystack status check:', e.message);
@@ -560,7 +540,7 @@ app.get('/api/orders/:id/payment', async (req, res) => {
   }
 });
 
-/* Customer order lookup */
+// Customer order lookup.
 app.post('/api/orders/lookup', async (req, res) => {
   const phone = clean(req.body?.phone, 40).replace(/\s/g, '');
 
@@ -574,27 +554,25 @@ app.post('/api/orders/lookup', async (req, res) => {
     const r = await pool.query(
       `SELECT id, customer, location,
               seed_class AS "seedClass",
-              variety, bags, delivery, total,
+              variety,
+              potato_size AS "potatoSize",
+              bags, delivery, total,
               payment_status AS "paymentStatus",
               delivery_status AS "deliveryStatus",
               created_at AS created
        FROM orders
        WHERE regexp_replace(phone, '\\s', '', 'g') = $1
-       ORDER BY created_at DESC
-       LIMIT 30`,
+       ORDER BY created_at DESC LIMIT 30`,
       [phone]
     );
 
     res.json(r.rows);
-
   } catch {
-    res.status(500).json({
-      error: 'Could not look up orders.'
-    });
+    res.status(500).json({ error: 'Could not look up orders.' });
   }
 });
 
-/* Administrator login */
+// Administrator login.
 app.post('/api/admin/login', async (req, res) => {
   const password = String(req.body?.password || '');
 
@@ -616,53 +594,42 @@ app.post('/api/admin/login', async (req, res) => {
   res.json({ token, expiresIn: 28800 });
 });
 
-/* Administrator order list */
+// Administrator order list.
 app.get('/api/admin/orders', auth, async (_req, res) => {
   try {
     const r = await pool.query(
       `SELECT id, customer, phone, email, location,
               seed_class AS "seedClass",
-              variety, bags, delivery,
+              variety,
+              potato_size AS "potatoSize",
+              bags, delivery,
               mpesa_ref AS "mpesaRef",
               mpesa_receipt AS "mpesaReceipt",
-              notes,
-              unit_price AS "unitPrice",
-              total,
+              notes, unit_price AS "unitPrice", total,
               payment_status AS "paymentStatus",
               delivery_status AS "deliveryStatus",
               created_at AS created
        FROM orders
-       ORDER BY created_at DESC
-       LIMIT 500`
+       ORDER BY created_at DESC LIMIT 500`
     );
 
     res.json(r.rows);
-
   } catch {
-    res.status(500).json({
-      error: 'Could not load orders.'
-    });
+    res.status(500).json({ error: 'Could not load orders.' });
   }
 });
 
-/* Administrator update order statuses */
+// Administrator update order statuses.
 app.patch('/api/admin/orders/:id', auth, async (req, res) => {
   const pay = [
-    'Pending verification',
-    'Verified',
-    'Rejected'
+    'Pending verification', 'Verified', 'Rejected'
   ].includes(req.body?.paymentStatus)
-    ? req.body.paymentStatus
-    : null;
+    ? req.body.paymentStatus : null;
 
   const del = [
-    'Order received',
-    'Preparing',
-    'Dispatched',
-    'Delivered'
+    'Order received', 'Preparing', 'Dispatched', 'Delivered'
   ].includes(req.body?.deliveryStatus)
-    ? req.body.deliveryStatus
-    : null;
+    ? req.body.deliveryStatus : null;
 
   if (!pay && !del) {
     return res.status(400).json({
@@ -675,8 +642,7 @@ app.patch('/api/admin/orders/:id', auth, async (req, res) => {
       `UPDATE orders
        SET payment_status = COALESCE($2, payment_status),
            delivery_status = COALESCE($3, delivery_status)
-       WHERE id = $1
-       RETURNING id`,
+       WHERE id = $1 RETURNING id`,
       [req.params.id, pay, del]
     );
 
@@ -685,15 +651,12 @@ app.patch('/api/admin/orders/:id', auth, async (req, res) => {
     }
 
     res.json({ ok: true });
-
   } catch {
-    res.status(500).json({
-      error: 'Could not update order.'
-    });
+    res.status(500).json({ error: 'Could not update order.' });
   }
 });
 
-/* Administrator update product price and availability */
+// Administrator update product availability and legacy price.
 app.patch('/api/admin/products/:id', auth, async (req, res) => {
   const price = Number(req.body?.price);
   const available = req.body?.available;
@@ -712,26 +675,19 @@ app.patch('/api/admin/products/:id', auth, async (req, res) => {
   try {
     const r = await pool.query(
       `UPDATE products
-       SET price = $2,
-           available = $3,
-           updated_at = NOW()
+       SET price = $2, available = $3, updated_at = NOW()
        WHERE id = $1
        RETURNING id, name, price, available`,
       [req.params.id, price, available]
     );
 
     if (!r.rowCount) {
-      return res.status(404).json({
-        error: 'Product not found.'
-      });
+      return res.status(404).json({ error: 'Product not found.' });
     }
 
     res.json(r.rows[0]);
-
   } catch {
-    res.status(500).json({
-      error: 'Could not update product.'
-    });
+    res.status(500).json({ error: 'Could not update product.' });
   }
 });
 
