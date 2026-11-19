@@ -1,3 +1,4 @@
+
 const express = require('express');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
@@ -83,7 +84,7 @@ const SHOP_PRODUCTS = [
     category: 'Fertilizer',
     unit: 'Bag',
     price: 2000,
-    image: '/images/ocp.jpg'
+    image: '/product-images/OCP'
   },
   {
     id: 'DAP',
@@ -91,7 +92,7 @@ const SHOP_PRODUCTS = [
     category: 'Fertilizer',
     unit: 'Bag',
     price: 4850,
-    image: '/images/dap.jpg'
+    image: '/product-images/DAP'
   },
   {
     id: 'NPK',
@@ -99,7 +100,7 @@ const SHOP_PRODUCTS = [
     category: 'Fertilizer',
     unit: 'Bag',
     price: 2000,
-    image: '/images/npk.jpg'
+    image: '/product-images/NPK'
   },
   {
     id: 'SUPERGRO',
@@ -107,7 +108,7 @@ const SHOP_PRODUCTS = [
     category: 'Chemical',
     unit: '1 Litre',
     price: 2700,
-    image: '/images/supergro.jpg'
+    image: '/product-images/SUPERGRO'
   },
   {
     id: 'MISTRESS',
@@ -115,7 +116,7 @@ const SHOP_PRODUCTS = [
     category: 'Chemical',
     unit: '1 kg',
     price: 800,
-    image: '/images/mistress.jpg'
+    image: '/product-images/MISTRESS'
   }
 ];
 
@@ -161,9 +162,8 @@ async function init() {
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS zetupay_transaction_id TEXT;
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS zetupay_reference TEXT;
 
-    -- Separate shop product catalog.
     CREATE TABLE IF NOT EXISTS shop_products (
-      id TEXT PRIMARY KEY,
+      id TEXT PRIMARY PRIMARY KEY,
       name TEXT NOT NULL,
       category TEXT NOT NULL,
       unit TEXT NOT NULL,
@@ -173,11 +173,9 @@ async function init() {
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
 
-    -- Add image column safely to existing databases.
     ALTER TABLE shop_products
     ADD COLUMN IF NOT EXISTS image TEXT NOT NULL DEFAULT '';
 
-    -- Shop orders do not overwrite existing seed orders.
     CREATE TABLE IF NOT EXISTS shop_orders (
       id TEXT PRIMARY KEY,
       customer TEXT NOT NULL,
@@ -206,7 +204,6 @@ async function init() {
     ON orders(phone);
   `);
 
-  // Initialize potato varieties.
   for (const [name, price, available] of seed) {
     await pool.query(
       `INSERT INTO products(name, price, available)
@@ -217,7 +214,6 @@ async function init() {
     );
   }
 
-  // Initialize farm shop products.
   for (const product of SHOP_PRODUCTS) {
     await pool.query(
       `INSERT INTO shop_products
@@ -581,6 +577,33 @@ async function updateShopZetuPayFailedStatus(orderId, payment) {
 }
 
 // ================================
+// PRODUCT IMAGE SERVING
+// ================================
+
+// Actual image filenames in the repository root.
+const productImageFiles = {
+  OCP: 'images (1) (1).jpeg',
+  DAP: 'images (30).jpeg',
+  NPK: 'download (5).webp',
+  SUPERGRO: 'download (1).webp',
+  MISTRESS: 'download (3).webp'
+};
+
+app.get('/product-images/:product', (req, res) => {
+  const filename = productImageFiles[req.params.product];
+
+  if (!filename) {
+    return res.status(404).send('Product image not found.');
+  }
+
+  res.sendFile(path.join(__dirname, filename), (err) => {
+    if (err && !res.headersSent) {
+      res.status(err.statusCode || 404).send('Image not found.');
+    }
+  });
+});
+
+// ================================
 // STATIC WEBSITE
 // ================================
 
@@ -754,7 +777,6 @@ async function getShopOrderDetails(b) {
       throw new Error('Invalid product quantity.');
     }
 
-    // Potato seed item.
     if (item.type === 'seed') {
       const variety = clean(item.variety, 100);
       const seedClass = clean(item.seedClass, 50);
@@ -799,7 +821,6 @@ async function getShopOrderDetails(b) {
       continue;
     }
 
-    // Fertilizer and chemical item.
     if (item.type === 'product') {
       const productId = clean(item.productId, 50);
 
@@ -1098,7 +1119,6 @@ app.post('/api/shop/orders/zetupay', async (req, res) => {
     const redirectUrl =
       `${appUrl}/?shopPayment=return&orderId=${encodeURIComponent(orderId)}`;
 
-    // Save order first.
     await pool.query(
       `INSERT INTO shop_orders
        (id, customer, phone, email, location, delivery,
