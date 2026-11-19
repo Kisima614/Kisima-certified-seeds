@@ -1,4 +1,3 @@
-
 const express = require('express');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
@@ -83,35 +82,40 @@ const SHOP_PRODUCTS = [
     name: 'OCP',
     category: 'Fertilizer',
     unit: 'Bag',
-    price: 2000
+    price: 2000,
+    image: '/images/ocp.jpg'
   },
   {
     id: 'DAP',
     name: 'DAP',
     category: 'Fertilizer',
     unit: 'Bag',
-    price: 4850
+    price: 4850,
+    image: '/images/dap.jpg'
   },
   {
     id: 'NPK',
     name: 'NPK',
     category: 'Fertilizer',
     unit: 'Bag',
-    price: 2000
+    price: 2000,
+    image: '/images/npk.jpg'
   },
   {
     id: 'SUPERGRO',
     name: 'Supergro',
     category: 'Chemical',
     unit: '1 Litre',
-    price: 2700
+    price: 2700,
+    image: '/images/supergro.jpg'
   },
   {
     id: 'MISTRESS',
     name: 'Mistress',
     category: 'Chemical',
     unit: '1 kg',
-    price: 800
+    price: 800,
+    image: '/images/mistress.jpg'
   }
 ];
 
@@ -164,9 +168,14 @@ async function init() {
       category TEXT NOT NULL,
       unit TEXT NOT NULL,
       price INTEGER NOT NULL CHECK(price >= 0),
+      image TEXT NOT NULL DEFAULT '',
       available BOOLEAN NOT NULL DEFAULT true,
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
+
+    -- Add image column safely to existing databases.
+    ALTER TABLE shop_products
+    ADD COLUMN IF NOT EXISTS image TEXT NOT NULL DEFAULT '';
 
     -- Shop orders do not overwrite existing seed orders.
     CREATE TABLE IF NOT EXISTS shop_orders (
@@ -212,20 +221,22 @@ async function init() {
   for (const product of SHOP_PRODUCTS) {
     await pool.query(
       `INSERT INTO shop_products
-       (id, name, category, unit, price, available)
-       VALUES($1,$2,$3,$4,$5,true)
+       (id, name, category, unit, price, image, available)
+       VALUES($1,$2,$3,$4,$5,$6,true)
        ON CONFLICT(id) DO UPDATE
        SET name = EXCLUDED.name,
            category = EXCLUDED.category,
            unit = EXCLUDED.unit,
            price = EXCLUDED.price,
+           image = EXCLUDED.image,
            updated_at = NOW()`,
       [
         product.id,
         product.name,
         product.category,
         product.unit,
-        product.price
+        product.price,
+        product.image
       ]
     );
   }
@@ -613,7 +624,7 @@ app.get('/api/products', async (_req, res) => {
 app.get('/api/shop/products', async (_req, res) => {
   try {
     const r = await pool.query(
-      `SELECT id, name, category, unit, price, available
+      `SELECT id, name, category, unit, price, image, available
        FROM shop_products
        ORDER BY category, name`
     );
@@ -1731,7 +1742,7 @@ app.patch('/api/admin/shop-products/:id', auth, async (req, res) => {
     console.error('ADMIN SHOP PRODUCT UPDATE ERROR:', e.message);
 
     return res.status(500).json({
-      error: 'Could not update shop product.'
+      error: 'Could not update farm shop product.'
     });
   }
 });
