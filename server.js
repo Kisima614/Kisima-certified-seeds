@@ -42,6 +42,8 @@ app.use('/api/', rateLimit({
   legacyHeaders: false
 }));
 
+app.use(express.json({ limit: '100kb' }));
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: process.env.DATABASE_SSL === 'false'
@@ -67,6 +69,10 @@ const seed = [
   ['Stephen', 3750, true],
   ['Markies', 3750, true]
 ];
+
+// ================================
+// DATABASE INITIALIZATION
+// ================================
 
 async function init() {
   await pool.query(`
@@ -102,9 +108,10 @@ async function init() {
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS mpesa_receipt TEXT;
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS potato_size TEXT NOT NULL DEFAULT 'Size 1';
 
-    -- ZetuPay migration: safe for existing orders.
+    -- ZetuPay payment columns.
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS zetupay_payment_key TEXT;
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS zetupay_transaction_id TEXT;
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS zetupay_reference TEXT;
   `);
 
   for (const [name, price, available] of seed) {
@@ -116,9 +123,15 @@ async function init() {
       [name, price, available]
     );
   }
+
+  console.log('Database initialized.');
 }
 
 const adminHash = bcrypt.hashSync(process.env.ADMIN_PASSWORD, 12);
+
+// ================================
+// AUTHENTICATION
+// ================================
 
 function auth(req, res, next) {
   const token = (req.headers.authorization || '')
@@ -128,7 +141,7 @@ function auth(req, res, next) {
     const data = jwt.verify(token, process.env.JWT_SECRET);
 
     if (data.role !== 'admin') {
-      throw new Error('role');
+      throw new Error('Invalid role');
     }
 
     req.admin = true;
@@ -140,15 +153,27 @@ function auth(req, res, next) {
   }
 }
 
+// ================================
+// HELPERS
+// ================================
+
 const clean = (v, max = 200) =>
   String(v ?? '').trim().slice(0, max);
 
 function normalizeKenyanPhone(value) {
   let p = String(value || '').replace(/[^\d+]/g, '');
 
-  if (p.startsWith('+')) p = p.slice(1);
-  if (p.startsWith('0')) p = '254' + p.slice(1);
-  if (p.startsWith('7') || p.startsWith('1')) p = '254' + p;
+  if (p.startsWith('+')) {
+    p = p.slice(1);
+  }
+
+  if (p.startsWith('0')) {
+    p = '254' + p.slice(1);
+  }
+
+  if (p.startsWith('7') || p.startsWith('1')) {
+    p = '254' + p;
+  }
 
   return /^254[17]\d{8}$/.test(p) ? p : null;
 }
@@ -172,6 +197,18 @@ function zetuPayKey() {
 
   return key;
 }
+
+function getAppUrl() {
+  return (
+    process.env.APP_URL ||
+    process.env.RENDER_EXTERNAL_URL ||
+    'https://kisimacertifiedseeds.co.ke'
+  ).replace(/\/+$/, '');
+}
+
+// ================================
+// ZETUPAY API
+// ================================
 
 async function zetuPayRequest(endpoint, options = {}) {
   const response = await fetch(
@@ -202,34 +239,65 @@ async function zetuPayRequest(endpoint, options = {}) {
   return data.data || data;
 }
 
-// Check payment directly with ZetuPay.
-async function verifyZetuPayPayment(paymentKey, expectedTotal) {
-  if (!paymentKey) return false;
+/*
+  Fetch the payment directly from ZetuPay.
+
+  This function does not assume that every non-success response
+  means a network error. It returns the actual payment status
+  when ZetuPay provides one.
+*/
+async function getZetuPayPayment(paymentKey) {
+  if (!paymentKey) {
+    return null;
+  }
 
   const response = await fetch(
-    `https://pay.zetupay.co.ke/api/v1/payment/${encodeURIComponent(paymentKey)}`
+    `https://pay.zetupay.co.ke/api/v1/payment/${encodeURIComponent(paymentKey)}`,
+    {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json'
+      },
+      cache: 'no-store'
+    }
   );
 
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok || data.success === false) {
-    return false;
+    return null;
   }
 
-  const payment = data.data || data;
+  return data.data || data;
+}
+
+/*
+  Successful payments must match:
+  - payment status
+  - expected amount
+  - KES currency
+*/
+async function verifyZetuPayPayment(paymentKey, expectedTotal) {
+  const payment = await getZetuPayPayment(paymentKey);
+
+  if (!payment) {
+    return null;
+  }
 
   if (
     payment.status !== 'success' ||
     payment.currency !== 'KES' ||
     Number(payment.amount) !== Number(expectedTotal)
   ) {
-    return false;
+    return null;
   }
 
   return payment;
 }
 
-// Mark an order as paid only after server-side verification.
+/*
+  Mark an order paid only after server-side verification.
+*/
 async function markZetuPayOrderPaid(paymentKey, paymentData) {
   const result = await pool.query(
     `SELECT id, total, payment_status
@@ -239,7 +307,7 @@ async function markZetuPayOrderPaid(paymentKey, paymentData) {
   );
 
   if (!result.rowCount) {
-    console.warn('Unknown ZetuPay payment key:', paymentKey);
+    console.warn('Unknown ZetuPay payment key.');
     return;
   }
 
@@ -255,16 +323,24 @@ async function markZetuPayOrderPaid(paymentKey, paymentData) {
   );
 
   if (!verified) {
-    console.error('ZetuPay payment verification failed:', paymentKey);
+    console.error('ZetuPay payment verification failed.');
     return;
   }
 
   const receipt = clean(
     paymentData?.receiptNumber ||
     paymentData?.receipt ||
-    paymentData?.waveTransactionId ||
+    verified?.receiptNumber ||
+    verified?.waveTransactionId ||
     paymentKey,
-    40
+    100
+  );
+
+  const transactionId = clean(
+    paymentData?.waveTransactionId ||
+    verified?.waveTransactionId ||
+    '',
+    100
   );
 
   await pool.query(
@@ -279,18 +355,55 @@ async function markZetuPayOrderPaid(paymentKey, paymentData) {
     [
       order.id,
       receipt,
-      clean(paymentData?.waveTransactionId || '', 100),
+      transactionId,
       paymentKey
     ]
   );
 
-  console.log('ZetuPay payment verified:', order.id);
+  console.log('ZetuPay payment verified for order:', order.id);
 }
 
-app.use(express.json({ limit: '100kb' }));
+/*
+  Update failed/cancelled/expired payments.
+
+  A payment is never marked rejected simply because the
+  verification request failed or timed out.
+*/
+async function updateZetuPayFailedStatus(orderId, payment) {
+  const status = String(payment?.status || '').toLowerCase();
+
+  const failedStatuses = [
+    'failed',
+    'cancelled',
+    'canceled',
+    'expired'
+  ];
+
+  if (!failedStatuses.includes(status)) {
+    return false;
+  }
+
+  await pool.query(
+    `UPDATE orders
+     SET payment_status = 'Rejected'
+     WHERE id = $1
+       AND payment_status <> 'Verified'`,
+    [orderId]
+  );
+
+  return true;
+}
+
+// ================================
+// STATIC WEBSITE
+// ================================
+
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Health check.
+// ================================
+// HEALTH CHECK
+// ================================
+
 app.get('/api/health', async (_req, res) => {
   try {
     await pool.query('SELECT 1');
@@ -300,7 +413,10 @@ app.get('/api/health', async (_req, res) => {
   }
 });
 
-// Product list.
+// ================================
+// PRODUCTS
+// ================================
+
 app.get('/api/products', async (_req, res) => {
   try {
     const r = await pool.query(
@@ -315,7 +431,10 @@ app.get('/api/products', async (_req, res) => {
   }
 });
 
-// Shared order validation.
+// ================================
+// ORDER VALIDATION
+// ================================
+
 async function getOrderDetails(b) {
   const customer = clean(b.customer, 100);
   const phone = clean(b.phone, 40);
@@ -343,6 +462,10 @@ async function getOrderDetails(b) {
 
   if (!Object.prototype.hasOwnProperty.call(CLASS_PRICES, seedClass)) {
     throw new Error('Please select a valid seed class.');
+  }
+
+  if (!['Delivery', 'Collection'].includes(delivery)) {
+    throw new Error('Please select a valid delivery method.');
   }
 
   const pr = await pool.query(
@@ -379,7 +502,10 @@ async function getOrderDetails(b) {
   };
 }
 
-// Manual M-Pesa order.
+// ================================
+// MANUAL M-PESA ORDERS
+// ================================
+
 app.post('/api/orders', async (req, res) => {
   const mpesa = clean(req.body?.mpesa, 40).toUpperCase();
 
@@ -401,13 +527,24 @@ app.post('/api/orders', async (req, res) => {
        VALUES
        ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`,
       [
-        id, o.customer, o.phone, o.email, o.location,
-        o.seedClass, o.variety, o.potatoSize, o.bags,
-        o.delivery, mpesa, o.notes, o.unitPrice, o.total
+        id,
+        o.customer,
+        o.phone,
+        o.email,
+        o.location,
+        o.seedClass,
+        o.variety,
+        o.potatoSize,
+        o.bags,
+        o.delivery,
+        mpesa,
+        o.notes,
+        o.unitPrice,
+        o.total
       ]
     );
 
-    res.status(201).json({
+    return res.status(201).json({
       id,
       total: o.total,
       unitPrice: o.unitPrice,
@@ -418,14 +555,19 @@ app.post('/api/orders', async (req, res) => {
   } catch (e) {
     console.error('ORDER SAVE ERROR:', e.message);
 
-    res.status(400).json({
+    return res.status(400).json({
       error: e.message
     });
   }
 });
 
-// ZetuPay hosted checkout payment.
+// ================================
+// ZETUPAY HOSTED CHECKOUT
+// ================================
+
 app.post('/api/orders/zetupay', async (req, res) => {
+  let orderId = null;
+
   try {
     const o = await getOrderDetails(req.body || {});
     const phone = normalizeKenyanPhone(o.phone);
@@ -442,34 +584,49 @@ app.post('/api/orders/zetupay', async (req, res) => {
       });
     }
 
-    const id = makeOrderId();
+    orderId = makeOrderId();
     const reference = makeZetuPayReference();
 
-    const appUrl = process.env.APP_URL ||
-      process.env.RENDER_EXTERNAL_URL ||
-      'https://kisimacertifiedseeds.co.ke';
+    const appUrl = getAppUrl();
 
-    const redirectUrl = process.env.PAYMENT_REDIRECT_URL ||
-      `${appUrl}/payment-return`;
+    /*
+      This return URL matches the HTML payment-return handler.
+      Customer returns to the home page with order ID.
+    */
+    const redirectUrl =
+      `${appUrl}/?payment=return&orderId=${encodeURIComponent(orderId)}`;
 
-    // Save the order before starting the payment.
+    // Save the order before starting payment.
     await pool.query(
       `INSERT INTO orders
        (id, customer, phone, email, location, seed_class,
         variety, potato_size, bags, delivery, notes,
         unit_price, total, payment_status,
-        payment_phone, paystack_reference)
+        payment_phone, paystack_reference, zetupay_reference)
        VALUES
        ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,
-        'Pending verification',$14,$15)`,
+        'Pending verification',$14,$15,$16)`,
       [
-        id, o.customer, o.phone, o.email, o.location,
-        o.seedClass, o.variety, o.potatoSize, o.bags,
-        o.delivery, o.notes, o.unitPrice, o.total,
-        phone, reference
+        orderId,
+        o.customer,
+        o.phone,
+        o.email,
+        o.location,
+        o.seedClass,
+        o.variety,
+        o.potatoSize,
+        o.bags,
+        o.delivery,
+        o.notes,
+        o.unitPrice,
+        o.total,
+        phone,
+        reference,
+        reference
       ]
     );
 
+    // Initiate hosted checkout.
     const payment = await zetuPayRequest('/payment/initiate', {
       method: 'POST',
       body: JSON.stringify({
@@ -478,7 +635,7 @@ app.post('/api/orders/zetupay', async (req, res) => {
         reference,
         redirectUrl,
         currency: 'KES',
-        identifier: id
+        identifier: orderId
       })
     });
 
@@ -486,16 +643,16 @@ app.post('/api/orders/zetupay', async (req, res) => {
       throw new Error('ZetuPay did not return a checkout link.');
     }
 
-    // Save the ZetuPay payment key for status checking.
+    // Store payment key for secure server-side verification.
     await pool.query(
       `UPDATE orders
        SET zetupay_payment_key = $2
        WHERE id = $1`,
-      [id, payment.paymentKey]
+      [orderId, payment.paymentKey]
     );
 
     return res.status(201).json({
-      id,
+      id: orderId,
       reference,
       paymentKey: payment.paymentKey,
       checkoutUrl: payment.checkoutUrl,
@@ -508,13 +665,16 @@ app.post('/api/orders/zetupay', async (req, res) => {
   } catch (e) {
     console.error('ZETUPAY INITIATION ERROR:', e.message);
 
-    return res.status(400).json({
+    return res.status(502).json({
       error: e.message || 'ZetuPay could not start payment.'
     });
   }
 });
 
-// Customer payment status.
+// ================================
+// PAYMENT STATUS CHECK
+// ================================
+
 app.get('/api/orders/:id/payment', async (req, res) => {
   try {
     const r = await pool.query(
@@ -535,54 +695,92 @@ app.get('/api/orders/:id/payment', async (req, res) => {
 
     const order = r.rows[0];
 
-    if (
-      order.paymentKey &&
-      order.paymentStatus !== 'Verified'
-    ) {
+    // Already verified: do not need to query provider again.
+    if (order.paymentStatus === 'Verified') {
+      return res.json({
+        id: order.id,
+        paymentStatus: 'Verified',
+        receipt: order.receipt
+      });
+    }
+
+    if (order.paymentKey) {
       try {
-        const verified = await verifyZetuPayPayment(
-          order.paymentKey,
-          order.total
-        );
+        const payment = await getZetuPayPayment(order.paymentKey);
 
-        if (verified) {
-          await markZetuPayOrderPaid(
+        if (payment) {
+          // Confirm successful payment against expected amount/currency.
+          const verified = await verifyZetuPayPayment(
             order.paymentKey,
-            verified
+            order.total
           );
 
-          const updated = await pool.query(
-            `SELECT payment_status AS "paymentStatus",
-                    mpesa_receipt AS receipt
-             FROM orders
-             WHERE id = $1`,
-            [order.id]
-          );
+          if (verified) {
+            await markZetuPayOrderPaid(
+              order.paymentKey,
+              verified
+            );
 
-          return res.json({
-            id: order.id,
-            ...updated.rows[0]
+            const updated = await pool.query(
+              `SELECT payment_status AS "paymentStatus",
+                      mpesa_receipt AS receipt
+               FROM orders
+               WHERE id = $1`,
+              [order.id]
+            );
+
+            return res.json({
+              id: order.id,
+              ...updated.rows[0]
             });
+          }
+
+          // Mark a genuinely failed/cancelled/expired provider payment.
+          await updateZetuPayFailedStatus(order.id, payment);
+
+          if (
+            ['failed', 'cancelled', 'canceled', 'expired']
+              .includes(String(payment.status || '').toLowerCase())
+          ) {
+            return res.json({
+              id: order.id,
+              paymentStatus: 'Rejected',
+              receipt: null
+            });
+          }
         }
       } catch (e) {
-        console.error('ZetuPay status check:', e.message);
+        console.error('ZetuPay status check error:', e.message);
       }
     }
 
-    res.json({
+    // Pending remains pending if provider verification is unavailable.
+    const latest = await pool.query(
+      `SELECT payment_status AS "paymentStatus",
+              mpesa_receipt AS receipt
+       FROM orders
+       WHERE id = $1`,
+      [order.id]
+    );
+
+    return res.json({
       id: order.id,
-      paymentStatus: order.paymentStatus,
-      receipt: order.receipt
+      ...latest.rows[0]
     });
 
-  } catch {
-    res.status(500).json({
+  } catch (e) {
+    console.error('Payment status endpoint error:', e.message);
+
+    return res.status(500).json({
       error: 'Could not check payment status.'
     });
   }
 });
 
-// Customer order lookup.
+// ================================
+// CUSTOMER ORDER LOOKUP
+// ================================
+
 app.post('/api/orders/lookup', async (req, res) => {
   const phone = clean(req.body?.phone, 40).replace(/\s/g, '');
 
@@ -609,15 +807,21 @@ app.post('/api/orders/lookup', async (req, res) => {
       [phone]
     );
 
-    res.json(r.rows);
-  } catch {
-    res.status(500).json({
+    return res.json(r.rows);
+
+  } catch (e) {
+    console.error('ORDER LOOKUP ERROR:', e.message);
+
+    return res.status(500).json({
       error: 'Could not look up orders.'
     });
   }
 });
 
-// Administrator login.
+// ================================
+// ADMIN LOGIN
+// ================================
+
 app.post('/api/admin/login', async (req, res) => {
   const password = String(req.body?.password || '');
 
@@ -636,13 +840,16 @@ app.post('/api/admin/login', async (req, res) => {
     { expiresIn: '8h' }
   );
 
-  res.json({
+  return res.json({
     token,
     expiresIn: 28800
   });
 });
 
-// Administrator order list.
+// ================================
+// ADMIN ORDER LIST
+// ================================
+
 app.get('/api/admin/orders', auth, async (_req, res) => {
   try {
     const r = await pool.query(
@@ -653,6 +860,8 @@ app.get('/api/admin/orders', auth, async (_req, res) => {
               bags, delivery,
               mpesa_ref AS "mpesaRef",
               mpesa_receipt AS "mpesaReceipt",
+              zetupay_reference AS "zetupayReference",
+              zetupay_transaction_id AS "zetupayTransactionId",
               notes, unit_price AS "unitPrice", total,
               payment_status AS "paymentStatus",
               delivery_status AS "deliveryStatus",
@@ -662,15 +871,21 @@ app.get('/api/admin/orders', auth, async (_req, res) => {
        LIMIT 500`
     );
 
-    res.json(r.rows);
-  } catch {
-    res.status(500).json({
+    return res.json(r.rows);
+
+  } catch (e) {
+    console.error('ADMIN ORDER LIST ERROR:', e.message);
+
+    return res.status(500).json({
       error: 'Could not load orders.'
     });
   }
 });
 
-// Administrator update order statuses.
+// ================================
+// ADMIN UPDATE ORDER STATUS
+// ================================
+
 app.patch('/api/admin/orders/:id', auth, async (req, res) => {
   const pay = [
     'Pending verification',
@@ -711,15 +926,21 @@ app.patch('/api/admin/orders/:id', auth, async (req, res) => {
       });
     }
 
-    res.json({ ok: true });
-  } catch {
-    res.status(500).json({
+    return res.json({ ok: true });
+
+  } catch (e) {
+    console.error('ADMIN ORDER UPDATE ERROR:', e.message);
+
+    return res.status(500).json({
       error: 'Could not update order.'
     });
   }
 });
 
-// Administrator update product availability and legacy price.
+// ================================
+// ADMIN PRODUCT UPDATE
+// ================================
+
 app.patch('/api/admin/products/:id', auth, async (req, res) => {
   const price = Number(req.body?.price);
   const available = req.body?.available;
@@ -752,18 +973,28 @@ app.patch('/api/admin/products/:id', auth, async (req, res) => {
       });
     }
 
-    res.json(r.rows[0]);
-  } catch {
-    res.status(500).json({
+    return res.json(r.rows[0]);
+
+  } catch (e) {
+    console.error('ADMIN PRODUCT UPDATE ERROR:', e.message);
+
+    return res.status(500).json({
       error: 'Could not update product.'
     });
   }
 });
 
-// Website home page.
+// ================================
+// WEBSITE HOME PAGE
+// ================================
+
 app.get('/', (_req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
+
+// ================================
+// START SERVER
+// ================================
 
 init()
   .then(() => {
