@@ -162,7 +162,7 @@ async function init() {
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS zetupay_reference TEXT;
 
     CREATE TABLE IF NOT EXISTS shop_products (
-      id TEXT PRIMARY KEY,
+      id TEXT PRIMARY PRIMARY KEY,
       name TEXT NOT NULL,
       category TEXT NOT NULL,
       unit TEXT NOT NULL,
