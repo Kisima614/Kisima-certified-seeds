@@ -1,1715 +1,991 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#103e26">
-
-<title>Kisima Certified Seeds | Viazi Soko</title>
-
-<meta name="description" content="Order certified potato seeds from Kisima Certified Seeds. Quality potato varieties, competitive prices and delivery across Kenya.">
-
+<title>Kisima Certified Seeds | Farm Shop</title>
+<meta name="description" content="Order certified potato seeds, fertilizers and farm chemicals from Kisima Certified Seeds.">
 <style>
-:root{
-  --green:#104b2b;
-  --dark:#07351d;
-  --mid:#1d6a3a;
-  --lime:#a7e635;
-  --light:#f3f8f1;
-  --white:#ffffff;
-  --text:#193525;
-  --muted:#64746a;
-  --border:#e1eae0;
-  --shadow:0 8px 30px rgba(0,0,0,.07);
+:root {
+  --green:#176b3b;
+  --dark:#10251a;
+  --light:#f5f8f4;
+  --gold:#e7b94b;
+  --white:#fff;
+  --muted:#68756c;
+  --border:#dfe7df;
 }
-
-*{
-  box-sizing:border-box;
-  scroll-behavior:smooth;
-}
-
-body{
+* { box-sizing:border-box; }
+body {
   margin:0;
   font-family:Arial,Helvetica,sans-serif;
   background:var(--light);
-  color:var(--text);
-  line-height:1.6;
+  color:var(--dark);
 }
-
-a{
-  text-decoration:none;
-}
-
-img{
-  max-width:100%;
-  display:block;
-}
-
-button,input,select,textarea{
-  font-family:inherit;
-}
-
-.topbar{
+button,input,select,textarea { font:inherit; }
+button { cursor:pointer; }
+header {
   background:var(--dark);
   color:white;
-  padding:9px 15px;
-  text-align:center;
-  font-size:12px;
-}
-
-.topbar-inner{
-  max-width:1200px;
-  margin:auto;
+  padding:16px 5%;
   display:flex;
-  justify-content:space-between;
-  flex-wrap:wrap;
-  gap:8px;
-}
-
-.header{
-  background:white;
-  padding:15px 5%;
-  display:flex;
-  justify-content:space-between;
   align-items:center;
+  justify-content:space-between;
   gap:15px;
+  flex-wrap:wrap;
 }
-
-.brand{
+.brand {
   display:flex;
   align-items:center;
   gap:12px;
 }
-
-.brand-icon{
-  width:52px;
-  height:52px;
-  background:#e5f5d7;
-  border-radius:50%;
+.logo {
+  width:48px;
+  height:48px;
+  background:var(--gold);
+  border-radius:12px;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:30px;
+  font-size:25px;
 }
-
-.brand-name{
+.brand h1 {
+  margin:0;
   font-size:20px;
-  font-weight:900;
-  line-height:1.1;
-  color:var(--green);
 }
-
-.brand-tag{
-  font-size:11px;
-  color:var(--mid);
-  font-weight:bold;
-  letter-spacing:1px;
+.brand small {
+  color:#c8d7cb;
 }
-
-.header-contact{
-  text-align:right;
-}
-
-.header-contact strong{
-  display:block;
-  color:var(--green);
-  font-size:18px;
-}
-
-.header-contact span{
-  font-size:12px;
-  color:var(--muted);
-}
-
-.nav{
-  position:sticky;
-  top:0;
-  z-index:100;
-  background:var(--dark);
+nav {
   display:flex;
-  justify-content:center;
+  gap:10px;
   flex-wrap:wrap;
-  gap:5px;
-  padding:12px 8px;
-  box-shadow:0 4px 12px rgba(0,0,0,.08);
 }
-
-.nav a{
+nav a {
   color:white;
-  padding:10px 15px;
-  font-size:14px;
-  font-weight:bold;
+  text-decoration:none;
+  padding:10px 13px;
   border-radius:8px;
 }
+nav a:hover { background:#254c34; }
 
-.nav a:hover{
-  background:var(--mid);
-}
-
-.nav .order-nav{
-  background:var(--lime);
-  color:var(--dark);
-}
-
-/* HERO */
-
-.hero{
-  position:relative;
-  min-height:500px;
-  display:flex;
-  align-items:center;
-  overflow:hidden;
+.hero {
+  padding:65px 5%;
   color:white;
   background:
-    linear-gradient(90deg,rgba(5,37,19,.95),rgba(8,48,25,.75),rgba(8,48,25,.25)),
-    url("assets/potato-farm.jpg") center/cover,
-    linear-gradient(135deg,#174d32,#3e824c);
+    linear-gradient(110deg,rgba(8,36,18,.92),rgba(15,74,37,.65)),
+    linear-gradient(135deg,#285c34,#67924e);
 }
-
-.hero-content{
-  max-width:1200px;
-  width:100%;
-  margin:auto;
-  padding:55px 6%;
+.hero h2 {
+  font-size:clamp(32px,5vw,56px);
+  margin:0 0 15px;
 }
-
-.hero-label{
-  display:inline-block;
-  background:rgba(167,230,53,.18);
-  color:#d7ff92;
-  border:1px solid rgba(167,230,53,.5);
-  border-radius:50px;
-  padding:7px 14px;
-  font-size:12px;
-  font-weight:bold;
-  margin-bottom:18px;
-}
-
-.hero h2{
-  font-size:clamp(32px,5vw,58px);
-  line-height:1.12;
-  max-width:700px;
-  margin:0 0 20px;
-  color:white;
-}
-
-.hero h2 span{
-  color:var(--lime);
-}
-
-.hero p{
-  max-width:620px;
+.hero p {
   font-size:18px;
-  color:#f1f6ef;
+  max-width:650px;
+  line-height:1.6;
 }
-
-.hero-buttons{
+.hero-buttons {
   display:flex;
-  flex-wrap:wrap;
   gap:12px;
-  margin-top:28px;
+  flex-wrap:wrap;
+  margin-top:25px;
 }
-
-.btn{
-  display:inline-flex;
-  justify-content:center;
-  align-items:center;
-  text-align:center;
-  padding:15px 22px;
-  border-radius:10px;
-  font-size:15px;
-  font-weight:bold;
+.btn {
   border:0;
-  cursor:pointer;
-  transition:.2s;
+  padding:13px 18px;
+  border-radius:9px;
+  font-weight:bold;
+  display:inline-block;
+  text-decoration:none;
 }
-
-.btn-primary{
-  background:var(--lime);
-  color:var(--dark);
+.btn-primary {
+  background:var(--gold);
+  color:#18251b;
 }
-
-.btn-primary:hover{
-  background:#b9f64c;
-  transform:translateY(-2px);
-}
-
-.btn-outline{
-  border:2px solid white;
-  color:white;
-  background:transparent;
-}
-
-.btn-outline:hover{
-  background:white;
-  color:var(--green);
-}
-
-.btn-green{
+.btn-green {
   background:var(--green);
   color:white;
 }
-
-.btn-green:hover{
-  background:var(--mid);
-}
-
-/* TRUST STRIP */
-
-.trust-strip{
-  background:white;
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  padding:22px 5%;
-  gap:12px;
-  border-bottom:1px solid var(--border);
-}
-
-.trust-item{
-  text-align:center;
-  padding:8px;
-}
-
-.trust-icon{
-  font-size:27px;
-}
-
-.trust-item strong{
-  display:block;
+.btn-outline {
+  border:1px solid #cbd8cd;
   color:var(--green);
-  font-size:14px;
+  background:white;
 }
-
-.trust-item span{
+.btn-danger {
+  background:#b83232;
+  color:white;
+}
+section {
+  padding:40px 5%;
+}
+.section-title {
+  margin:0 0 8px;
+  font-size:28px;
+}
+.section-subtitle {
   color:var(--muted);
-  font-size:12px;
+  margin:0 0 25px;
 }
-
-/* MAIN CONTENT */
-
-.container{
-  max-width:1200px;
-  margin:auto;
-  padding:25px 16px;
+.grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+  gap:18px;
 }
-
-.section{
-  margin:30px 0;
+.card {
   background:white;
   border:1px solid var(--border);
-  border-radius:18px;
-  padding:26px;
-  box-shadow:var(--shadow);
-}
-
-.section-heading{
-  margin-bottom:20px;
-}
-
-.section-heading h2{
-  margin:0;
-  color:var(--green);
-  font-size:27px;
-}
-
-.section-heading p{
-  margin:7px 0 0;
-  color:var(--muted);
-}
-
-.heading-line{
-  width:65px;
-  height:4px;
-  background:var(--lime);
-  border-radius:10px;
-  margin-top:10px;
-}
-
-/* VARIETIES */
-
-.products{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
-  gap:15px;
-}
-
-.product{
-  background:#f4f9f2;
-  border:1px solid #e3eee1;
-  border-radius:14px;
-  overflow:hidden;
-  transition:.2s;
-}
-
-.product:hover{
-  transform:translateY(-4px);
-  box-shadow:var(--shadow);
-}
-
-.product-image{
-  height:155px;
-  background:linear-gradient(135deg,#d7e9cd,#b8d4a8);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  overflow:hidden;
-}
-
-.product-image img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-}
-
-.product-image .placeholder{
-  font-size:50px;
-}
-
-.product-info{
-  padding:14px;
-  text-align:center;
-}
-
-.product-info h3{
-  color:var(--green);
-  margin:0;
-  font-size:17px;
-}
-
-.product-info p{
-  font-size:12px;
-  color:var(--muted);
-  margin:5px 0 0;
-}
-
-/* ABOUT */
-
-.about-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:25px;
-  align-items:center;
-}
-
-.about-photo{
-  min-height:300px;
-  border-radius:14px;
-  overflow:hidden;
-  background:
-    linear-gradient(135deg,#c5e0b6,#6eaa65);
-}
-
-.about-photo img{
-  width:100%;
-  height:100%;
-  min-height:300px;
-  object-fit:cover;
-}
-
-.about-text h2{
-  color:var(--green);
-  font-size:27px;
-}
-
-.about-text p{
-  color:#52645a;
-}
-
-.feature-list{
-  padding:0;
-  list-style:none;
-}
-
-.feature-list li{
-  padding:8px 0;
-  font-weight:bold;
-}
-
-.feature-list li:before{
-  content:"✓";
-  color:#319349;
-  font-weight:bold;
-  margin-right:10px;
-}
-
-/* PRICES */
-
-.price-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:15px;
-}
-
-.price-card{
-  border-radius:14px;
-  background:#f3f9ef;
-  border:1px solid #e1eddb;
-  padding:22px;
-  text-align:center;
-}
-
-.price-card h3{
-  color:var(--green);
-  margin:0 0 10px;
-}
-
-.price-card .price{
-  font-size:27px;
-  font-weight:900;
-  color:var(--green);
-}
-
-.price-card p{
-  font-size:13px;
-  color:var(--muted);
-}
-
-.price-note{
-  background:#eaf6df;
-  padding:12px;
-  border-radius:9px;
-  margin-top:15px;
-  text-align:center;
-  font-weight:bold;
-}
-
-/* OFFER */
-
-.offer{
-  background:linear-gradient(135deg,#fff8dd,#ffefb5);
-  border:1px solid #f1df9a;
-  border-radius:16px;
-  padding:25px;
-}
-
-.offer h2{
-  color:#8b5700;
-  margin-top:0;
-}
-
-.offer-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:15px;
-}
-
-.offer-card{
-  background:white;
-  padding:18px;
-  border-radius:12px;
-  text-align:center;
-}
-
-.offer-card strong{
-  display:block;
-  font-size:19px;
-  color:#a26400;
-}
-
-.offer-card span{
-  font-size:14px;
-}
-
-/* DELIVERY */
-
-.delivery-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
-  gap:15px;
-}
-
-.delivery-card{
-  background:#f3f8f1;
+  border-radius:15px;
   padding:20px;
-  text-align:center;
-  border-radius:12px;
+  box-shadow:0 4px 14px rgba(15,40,20,.04);
 }
-
-.delivery-card .icon{
-  font-size:35px;
+.card h3 {
+  margin:0 0 8px;
 }
-
-.delivery-card h3{
+.card p {
+  color:var(--muted);
+  line-height:1.5;
+}
+.price {
+  font-size:22px;
   color:var(--green);
-  font-size:16px;
+  font-weight:bold;
+  margin:12px 0;
 }
-
-/* ORDER FORM */
-
-#order{
-  border:2px solid #dcebd7;
+.product-icon {
+  font-size:40px;
+  margin-bottom:10px;
 }
-
-.form-grid{
+.controls {
   display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:0 16px;
-}
-
-label{
-  display:block;
-  margin-top:13px;
-  font-weight:bold;
-  font-size:14px;
-  color:var(--green);
-}
-
-input,select,textarea{
-  width:100%;
-  padding:13px;
-  margin-top:6px;
-  border:1px solid #cbd9cc;
-  border-radius:9px;
-  font-size:16px;
-  background:white;
-  color:#193525;
-}
-
-input:focus,select:focus,textarea:focus{
-  outline:2px solid #b4e56b;
-  border-color:var(--green);
-}
-
-.total{
-  background:#eaf6df;
-  border:1px solid #d6e9c9;
-  padding:18px;
-  margin-top:18px;
-  border-radius:12px;
-  font-size:21px;
-  font-weight:bold;
-  color:var(--green);
-}
-
-.status{
-  padding:13px;
-  border-radius:9px;
-  background:#edf5eb;
-  margin-top:14px;
-  display:none;
-  overflow-wrap:anywhere;
-}
-
-.payment-note{
-  background:#edf5eb;
-  padding:15px;
-  border-radius:10px;
+  gap:10px;
   margin-top:15px;
 }
-
-.payment-note strong{
-  color:var(--green);
-}
-
-.submit-button{
-  background:var(--green);
-  color:white;
-  border:0;
-  border-radius:10px;
-  width:100%;
-  padding:17px;
-  font-size:17px;
-  font-weight:bold;
-  margin-top:20px;
-  cursor:pointer;
-}
-
-.submit-button:hover{
-  background:var(--mid);
-}
-
-.submit-button:disabled{
-  opacity:.6;
-  cursor:not-allowed;
-}
-
-/* CONTACT */
-
-.contact-section{
-  background:linear-gradient(135deg,#0b3c21,#1d6a3a);
-  color:white;
-  text-align:center;
-  padding:35px 22px;
-  border-radius:18px;
-}
-
-.contact-section h2{
-  color:white;
-}
-
-.contact-number{
-  font-size:24px;
-  font-weight:bold;
-}
-
-.contact-buttons{
-  display:flex;
-  flex-wrap:wrap;
-  gap:12px;
-  justify-content:center;
-  margin-top:20px;
-}
-
-.contact-buttons .btn{
-  min-width:200px;
-}
-
-.whatsapp{
-  background:#22a75a;
-  color:white;
-}
-
-.phone{
-  background:white;
-  color:var(--green);
-}
-
-/* FOOTER */
-
-footer{
-  background:#07351d;
-  color:white;
-  text-align:center;
-  padding:30px 15px;
-}
-
-footer strong{
-  font-size:18px;
-}
-
-footer p{
+label {
+  display:block;
   font-size:13px;
-  color:#cbd9cf;
+  font-weight:bold;
+  margin-bottom:5px;
 }
-
-/* FLOATING WHATSAPP */
-
-.whatsapp-float{
+input,select,textarea {
+  width:100%;
+  padding:12px;
+  border:1px solid #cfdacf;
+  border-radius:8px;
+  background:white;
+}
+textarea {
+  resize:vertical;
+  min-height:90px;
+}
+.row {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+.cart-section {
+  background:#edf4ed;
+}
+.cart-item {
+  display:flex;
+  justify-content:space-between;
+  gap:15px;
+  padding:14px 0;
+  border-bottom:1px solid var(--border);
+  align-items:center;
+}
+.cart-item:last-child { border-bottom:0; }
+.cart-item small {
+  display:block;
+  color:var(--muted);
+  margin-top:5px;
+}
+.cart-total {
+  font-size:26px;
+  font-weight:bold;
+  color:var(--green);
+  padding-top:20px;
+}
+.empty {
+  color:var(--muted);
+  padding:10px 0;
+}
+.checkout {
+  max-width:800px;
+  margin:auto;
+}
+.checkout form {
+  display:grid;
+  gap:15px;
+}
+.payment-box {
+  background:#f2f8f2;
+  padding:16px;
+  border-radius:10px;
+  border:1px solid #d8e7d8;
+}
+.status {
+  padding:14px;
+  border-radius:10px;
+  margin:15px 0;
+  display:none;
+  line-height:1.5;
+}
+.status.show { display:block; }
+.status.success {
+  background:#e4f5e8;
+  color:#14572e;
+}
+.status.error {
+  background:#fde9e9;
+  color:#842626;
+}
+.status.info {
+  background:#e8f1fb;
+  color:#234e78;
+}
+.badge {
+  display:inline-block;
+  border-radius:30px;
+  padding:6px 10px;
+  background:#e4f5e8;
+  color:#176b3b;
+  font-size:12px;
+  font-weight:bold;
+}
+footer {
+  background:var(--dark);
+  color:white;
+  padding:35px 5%;
+  text-align:center;
+}
+footer a { color:#f5d270; }
+.whatsapp {
   position:fixed;
   right:16px;
-  bottom:18px;
-  z-index:999;
-  width:58px;
-  height:58px;
-  background:#20b85a;
+  bottom:16px;
+  background:#1a9d55;
   color:white;
-  border-radius:50%;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  font-size:29px;
+  padding:14px 17px;
+  border-radius:50px;
+  text-decoration:none;
+  font-weight:bold;
   box-shadow:0 4px 15px #0003;
+  z-index:10;
 }
-
-/* MOBILE */
-
-@media(max-width:700px){
-
-  .topbar-inner{
-    justify-content:center;
-  }
-
-  .header{
-    padding:12px;
-  }
-
-  .brand-icon{
-    width:42px;
-    height:42px;
-    font-size:25px;
-  }
-
-  .brand-name{
-    font-size:16px;
-  }
-
-  .header-contact strong{
-    font-size:15px;
-  }
-
-  .header-contact span{
-    font-size:10px;
-  }
-
-  .nav{
-    justify-content:flex-start;
-    overflow-x:auto;
-    flex-wrap:nowrap;
-    white-space:nowrap;
-    padding:10px 5px;
-  }
-
-  .nav a{
-    font-size:12px;
-    padding:9px 12px;
-  }
-
-  .hero{
-    min-height:440px;
-  }
-
-  .hero-content{
-    padding:45px 20px;
-  }
-
-  .hero h2{
-    font-size:36px;
-  }
-
-  .hero p{
-    font-size:16px;
-  }
-
-  .hero-buttons{
-    flex-direction:column;
-  }
-
-  .hero-buttons .btn{
-    width:100%;
-  }
-
-  .trust-strip{
-    grid-template-columns:1fr 1fr;
-    padding:15px 8px;
-  }
-
-  .trust-item{
-    border-bottom:1px solid #edf0ed;
-  }
-
-  .container{
-    padding:12px;
-  }
-
-  .section{
-    padding:18px;
-    margin:18px 0;
-  }
-
-  .section-heading h2{
-    font-size:23px;
-  }
-
-  .products{
-    grid-template-columns:repeat(2,1fr);
-    gap:10px;
-  }
-
-  .product-image{
-    height:125px;
-  }
-
-  .product-info{
-    padding:11px;
-  }
-
-  .about-grid{
-    grid-template-columns:1fr;
-  }
-
-  .about-photo,
-  .about-photo img{
-    min-height:220px;
-  }
-
-  .offer-grid{
-    grid-template-columns:1fr;
-  }
-
-  .form-grid{
-    grid-template-columns:1fr;
-  }
-
-  .contact-number{
-    font-size:21px;
-  }
-
-  table{
-    font-size:12px;
-  }
-
-  th,td{
-    padding:8px 4px;
-  }
-
-  .whatsapp-float{
-    width:52px;
-    height:52px;
-    right:12px;
-    bottom:12px;
-  }
+button:disabled {
+  opacity:.55;
+  cursor:not-allowed;
 }
-
-@media(max-width:360px){
-  .hero h2{
-    font-size:30px;
-  }
-
-  .products{
-    grid-template-columns:1fr 1fr;
-  }
+@media(max-width:600px) {
+  header { padding:14px 4%; }
+  .brand h1 { font-size:17px; }
+  nav { width:100%; }
+  nav a { padding:8px; font-size:13px; }
+  .hero { padding:45px 5%; }
+  section { padding:30px 4%; }
+  .row { grid-template-columns:1fr; }
+  .cart-item { align-items:flex-start; }
 }
 </style>
 </head>
 
 <body>
 
-<!-- TOP BAR -->
+<header>
+  <div class="brand">
+    <div class="logo">🌱</div>
+    <div>
+      <h1>Kisima Certified Seeds</h1>
+      <small>Seeds • Fertilizers • Farm Chemicals</small>
+    </div>
+  </div>
 
-<div class="topbar">
-  <div class="topbar-inner">
-    <span>🌱 Certified Potato Seeds</span>
-    <span>✔ Quality Seed Varieties</span>
-    <span>🚚 Delivery Across Kenya</span>
+  <nav>
+    <a href="#seeds">Seeds</a>
+    <a href="#shop">Farm Shop</a>
+    <a href="#cart">Cart <span id="cartCount">0</span></a>
+    <a href="#checkout">Checkout</a>
+  </nav>
+</header>
+
+<div class="hero">
+  <h2>Grow Better.<br>Harvest More.</h2>
+  <p>
+    Get certified potato seeds, fertilizers and farm chemicals from
+    Kisima Certified Seeds. Order conveniently online and choose delivery
+    or collection.
+  </p>
+  <div class="hero-buttons">
+    <a href="#seeds" class="btn btn-primary">Shop Potato Seeds</a>
+    <a href="#shop" class="btn btn-outline">Visit Farm Shop</a>
   </div>
 </div>
 
-<!-- HEADER -->
-
-<header class="header">
-
-  <div class="brand">
-    <div class="brand-icon">🌱</div>
-    <div>
-      <div class="brand-name">KISIMA</div>
-      <div class="brand-name">CERTIFIED SEEDS</div>
-      <div class="brand-tag">VIAZI SOKO</div>
-    </div>
-  </div>
-
-  <div class="header-contact">
-    <span>Call / WhatsApp</span>
-    <strong>0715171470</strong>
-  </div>
-
-</header>
-
-<!-- NAVIGATION -->
-
-<nav class="nav">
-  <a href="#home">Home</a>
-  <a href="#varieties">Varieties</a>
-  <a href="#prices">Prices</a>
-  <a href="#order">Order Seeds</a>
-  <a href="#delivery">Delivery</a>
-  <a href="#contact">Contact</a>
-</nav>
-
-<!-- HERO -->
-
-<section class="hero" id="home">
-
-  <div class="hero-content">
-
-    <div class="hero-label">
-      QUALITY CERTIFIED POTATO SEEDS
-    </div>
-
-    <h2>
-      Certified Potato Seeds for
-      <span>Higher Yields & Better Profits</span>
-    </h2>
-
-    <p>
-      Quality potato seeds for farmers across Kenya.
-      Choose your preferred variety, place your order,
-      and arrange delivery to your location.
-    </p>
-
-    <div class="hero-buttons">
-      <a href="#order" class="btn btn-primary">
-        🛒 ORDER SEEDS NOW
-      </a>
-
-      <a href="https://wa.me/254717592943"
-         class="btn btn-outline"
-         target="_blank">
-        💬 CHAT ON WHATSAPP
-      </a>
-    </div>
-
-  </div>
-
-</section>
-
-<!-- TRUST FEATURES -->
-
-<section class="trust-strip">
-
-  <div class="trust-item">
-    <div class="trust-icon">🌱</div>
-    <strong>Quality Seeds</strong>
-    <span>Carefully selected varieties</span>
-  </div>
-
-  <div class="trust-item">
-    <div class="trust-icon">🥔</div>
-    <strong>Potato Varieties</strong>
-    <span>Varieties for farmers</span>
-  </div>
-
-  <div class="trust-item">
-    <div class="trust-icon">🚚</div>
-    <strong>Countrywide Delivery</strong>
-    <span>Delivery arrangements available</span>
-  </div>
-
-  <div class="trust-item">
-    <div class="trust-icon">📞</div>
-    <strong>Customer Support</strong>
-    <span>Talk to our team</span>
-  </div>
-
-</section>
-
-<div class="container">
-
-<!-- VARIETIES -->
-
-<section class="section" id="varieties">
-
-  <div class="section-heading">
-    <h2>Our Potato Seed Varieties</h2>
-    <p>Choose the variety that suits your farming needs.</p>
-    <div class="heading-line"></div>
-  </div>
-
-  <div class="products">
-
-    <div class="product">
-      <div class="product-image">
-        <div class="placeholder">🥔</div>
-      </div>
-      <div class="product-info">
-        <h3>Unica</h3>
-        <p>Certified potato seeds</p>
-      </div>
-    </div>
-
-    <div class="product">
-      <div class="product-image">
-        <div class="placeholder">🥔</div>
-      </div>
-      <div class="product-info">
-        <h3>Shangi</h3>
-        <p>Popular potato variety</p>
-      </div>
-    </div>
-
-    <div class="product">
-      <div class="product-image">
-        <div class="placeholder">🥔</div>
-      </div>
-      <div class="product-info">
-        <h3>Super Shangi</h3>
-        <p>Quality seed variety</p>
-      </div>
-    </div>
-
-    <div class="product">
-      <div class="product-image">
-        <div class="placeholder">🥔</div>
-      </div>
-      <div class="product-info">
-        <h3>White Shangi</h3>
-        <p>Quality potato seeds</p>
-      </div>
-    </div>
-
-    <div class="product">
-      <div class="product-image">
-        <div class="placeholder">🥔</div>
-      </div>
-      <div class="product-info">
-        <h3>Dutch</h3>
-        <p>Certified seed variety</p>
-      </div>
-    </div>
-
-    <div class="product">
-      <div class="product-image">
-        <div class="placeholder">🥔</div>
-      </div>
-      <div class="product-info">
-        <h3>Sheherekea</h3>
-        <p>Quality potato seeds</p>
-      </div>
-    </div>
-
-    <div class="product">
-      <div class="product-image">
-        <div class="placeholder">🥔</div>
-      </div>
-      <div class="product-info">
-        <h3>Stephen</h3>
-        <p>Certified seed variety</p>
-      </div>
-    </div>
-
-    <div class="product">
-      <div class="product-image">
-        <div class="placeholder">🥔</div>
-      </div>
-      <div class="product-info">
-        <h3>Markies</h3>
-        <p>Quality potato seeds</p>
-      </div>
-    </div>
-
-  </div>
-
-</section>
-
-<!-- ABOUT / QUALITY -->
-
-<section class="section">
-
-  <div class="about-grid">
-
-    <div class="about-photo">
-      <img
-        src="assets/potato-farm.jpg"
-        alt="Kisima potato farm"
-        onerror="this.style.display='none'">
-    </div>
-
-    <div class="about-text">
-
-      <h2>Grow with Quality Seeds</h2>
-
-      <p>
-        At Kisima Certified Seeds, we are committed to helping farmers
-        access quality potato seed varieties for their farming needs.
-      </p>
-
-      <p>
-        We make it easy to select your preferred variety, choose your
-        seed class, and place your order conveniently online.
-      </p>
-
-      <ul class="feature-list">
-        <li>Quality potato seed varieties</li>
-        <li>Convenient online ordering</li>
-        <li>50 kg seed bags</li>
-        <li>Delivery arrangements across Kenya</li>
-        <li>Customer support when you need us</li>
-      </ul>
-
-    </div>
-
-  </div>
-
-</section>
-
-<!-- PRICES -->
-
-<section class="section" id="prices">
-
-  <div class="section-heading">
-    <h2>Our Seed Prices</h2>
-    <p>Prices per 50 kg bag</p>
-    <div class="heading-line"></div>
-  </div>
-
-  <div class="price-grid">
-
-    <div class="price-card">
-      <h3>Generation 1 (C1)</h3>
-      <div class="price">KSh 3,750</div>
-      <p>Per 50 kg bag</p>
-    </div>
-
-    <div class="price-card">
-      <h3>Generation 2 (C2)</h3>
-      <div class="price">KSh 3,450</div>
-      <p>Per 50 kg bag</p>
-    </div>
-
-    <div class="price-card">
-      <h3>Basic</h3>
-      <div class="price">KSh 4,350</div>
-      <p>Per 50 kg bag</p>
-    </div>
-
-    <div class="price-card">
-      <h3>Prebasic</h3>
-      <div class="price">KSh 4,750</div>
-      <p>Per 50 kg bag</p>
-    </div>
-
-  </div>
-
-  <div class="price-note">
-    All seed bags are supplied in certified 50 kg packaging.
-    Same prices apply to Size 1 and Size 2.
-  </div>
-
-</section>
-
-<!-- SPECIAL OFFER -->
-
-<section class="section">
-
-  <div class="offer">
-
-    <h2>🎁 Special Fertilizer Offers</h2>
-
-    <div class="offer-grid">
-
-      <div class="offer-card">
-        <strong>Buy 5 Bags</strong>
-        <span>Get 1 bag of fertilizer FREE</span>
-      </div>
-
-      <div class="offer-card">
-        <strong>Buy 10 Bags or More</strong>
-        <span>Get 3 bags of fertilizer FREE</span>
-      </div>
-
-    </div>
-
-  </div>
-
-</section>
-
-<!-- DELIVERY -->
-
-<section class="section" id="delivery">
-
-  <div class="section-heading">
-    <h2>Delivery Across Kenya</h2>
-    <p>We help farmers arrange delivery to their preferred locations.</p>
-    <div class="heading-line"></div>
-  </div>
-
-  <div class="delivery-grid">
-
-    <div class="delivery-card">
-      <div class="icon">🇰🇪</div>
-      <h3>Countrywide Coverage</h3>
-      <p>Delivery arrangements across Kenya.</p>
-    </div>
-
-    <div class="delivery-card">
-      <div class="icon">🚚</div>
-      <h3>Convenient Delivery</h3>
-      <p>Provide your location when placing your order.</p>
-    </div>
-
-    <div class="delivery-card">
-      <div class="icon">📦</div>
-      <h3>50 kg Bags</h3>
-      <p>Seed packaging for your order.</p>
-    </div>
-
-  </div>
-
-</section>
-
-<!-- ORDER FORM -->
-
-<section class="section" id="order">
-
-  <div class="section-heading">
-    <h2>Place Your Seed Order</h2>
-    <p>Complete the form below to order your preferred potato seeds.</p>
-    <div class="heading-line"></div>
-  </div>
-
-  <form id="orderForm">
-
-    <div class="form-grid">
-
+<section id="seeds">
+  <h2 class="section-title">Certified Potato Seeds</h2>
+  <p class="section-subtitle">
+    Select your variety, seed class, potato size and quantity.
+  </p>
+
+  <div class="card">
+    <div class="row">
       <div>
-        <label>Full Name</label>
-        <input type="text" id="name"
-               placeholder="Enter your full name" required>
+        <label for="seedVariety">Potato variety</label>
+        <select id="seedVariety"></select>
       </div>
-
       <div>
-        <label>Phone Number for M-Pesa</label>
-        <input type="tel" id="phone"
-               placeholder="07XXXXXXXX or 2547XXXXXXXX" required>
-      </div>
-
-      <div>
-        <label>Email Address</label>
-        <input type="email" id="email"
-               placeholder="Enter your email address" required>
-      </div>
-
-      <div>
-        <label>Seed Class</label>
-        <select id="seedClass" required>
-          <option value="">Select seed class</option>
-          <option value="C1">Generation 1 (C1)</option>
-          <option value="C2">Generation 2 (C2)</option>
-          <option value="Basic">Basic</option>
-          <option value="Prebasic">Prebasic</option>
+        <label for="seedClass">Seed class</label>
+        <select id="seedClass">
+          <option value="C1">C1 — KSh 3,750</option>
+          <option value="C2">C2 — KSh 3,450</option>
+          <option value="Basic">Basic — KSh 4,350</option>
+          <option value="Prebasic">Prebasic — KSh 4,750</option>
         </select>
       </div>
+    </div>
 
+    <div class="row" style="margin-top:12px">
       <div>
-        <label>Potato Size</label>
-        <select id="potatoSize" required>
-          <option value="">Select potato size</option>
-          <option value="Size 1">Size 1</option>
-          <option value="Size 2">Size 2</option>
+        <label for="potatoSize">Potato size</label>
+        <select id="potatoSize">
+          <option>Size 1</option>
+          <option>Size 2</option>
         </select>
       </div>
-
       <div>
-        <label>Potato Variety</label>
-        <select id="variety" required>
-          <option value="">Select variety</option>
-          <option>Unica</option>
-          <option>Shangi</option>
-          <option>Super Shangi</option>
-          <option>White Shangi</option>
-          <option>Dutch</option>
-          <option>Sheherekea</option>
-          <option>Stephen</option>
-          <option>Markies</option>
-        </select>
+        <label for="seedQuantity">Number of 50kg bags</label>
+        <input id="seedQuantity" type="number" min="1" max="500" value="1">
+      </div>
+    </div>
+
+    <div class="price" id="seedPriceDisplay">KSh 3,750 per bag</div>
+    <button class="btn btn-green" onclick="addSeedToCart()">Add Seeds to Cart</button>
+  </div>
+</section>
+
+<section id="shop">
+  <h2 class="section-title">Farm Shop</h2>
+  <p class="section-subtitle">
+    Fertilizers and chemicals. Add them to your cart together with potato seeds.
+  </p>
+
+  <div id="shopProducts" class="grid">
+    <div class="card">Loading farm shop products...</div>
+  </div>
+</section>
+
+<section id="cart" class="cart-section">
+  <h2 class="section-title">Your Shopping Cart</h2>
+  <p class="section-subtitle">Review your seeds, fertilizers and chemicals.</p>
+
+  <div class="card">
+    <div id="cartItems"></div>
+    <div id="cartTotal" class="cart-total">Total: KSh 0</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:15px">
+      <button class="btn btn-outline" onclick="clearCart()">Clear Cart</button>
+      <a href="#checkout" class="btn btn-green">Proceed to Checkout</a>
+    </div>
+  </div>
+</section>
+
+<section id="checkout">
+  <div class="checkout">
+    <h2 class="section-title">Checkout</h2>
+    <p class="section-subtitle">Enter your details to place your order.</p>
+
+    <div id="checkoutStatus" class="status"></div>
+
+    <form id="checkoutForm">
+      <div>
+        <label for="customer">Full name *</label>
+        <input id="customer" required maxlength="100" placeholder="Your full name">
+      </div>
+
+      <div class="row">
+        <div>
+          <label for="phone">Phone number *</label>
+          <input id="phone" required maxlength="40" placeholder="07XXXXXXXX">
+        </div>
+        <div>
+          <label for="email">Email address</label>
+          <input id="email" type="email" maxlength="200" placeholder="Optional email">
+        </div>
       </div>
 
       <div>
-        <label>Number of 50 kg Bags</label>
-        <input type="number" id="bags"
-               min="1" max="500" value="1" required>
+        <label for="location">Delivery location / address *</label>
+        <input id="location" required maxlength="220" placeholder="County, town, village or delivery address">
       </div>
 
       <div>
-        <label>Delivery Location</label>
-        <input type="text" id="location"
-               placeholder="Town, county or delivery point" required>
-      </div>
-
-      <div>
-        <label>Delivery Method</label>
+        <label for="delivery">Delivery method *</label>
         <select id="delivery" required>
-          <option value="">Select delivery method</option>
+          <option value="">Select delivery or collection</option>
           <option value="Delivery">Delivery</option>
           <option value="Collection">Collection</option>
         </select>
       </div>
 
       <div>
-        <label>Payment Method</label>
+        <label for="paymentMethod">Payment method *</label>
         <select id="paymentMethod" required>
-          <option value="zetupay">ZetuPay M-Pesa payment</option>
-          <option value="manual">I have already paid manually</option>
+          <option value="ZetuPay">M-Pesa via ZetuPay</option>
+          <option value="Manual">Manual M-Pesa</option>
         </select>
       </div>
 
-    </div>
+      <div id="manualMpesaBox" class="payment-box" style="display:none">
+        <label for="mpesaCode">M-Pesa transaction code *</label>
+        <input id="mpesaCode" maxlength="15" placeholder="Enter M-Pesa transaction code">
+        <p style="font-size:13px;color:#52645a">
+          Enter the transaction code for the payment you have already made.
+          Your order will be held for payment verification.
+        </p>
+      </div>
 
-    <div class="payment-note" id="paymentInfo">
-      <strong>ZetuPay M-Pesa</strong>
-      <p>You will be redirected to the secure ZetuPay payment page to complete your M-Pesa payment.</p>
-      <p>Your payment will be verified automatically after confirmation.</p>
-    </div>
+      <div>
+        <label for="notes">Additional notes</label>
+        <textarea id="notes" maxlength="500" placeholder="Any special instructions (optional)"></textarea>
+      </div>
 
-    <div id="manualReference" style="display:none">
+      <div class="payment-box">
+        <strong>Order total</strong>
+        <div id="checkoutTotal" class="cart-total">KSh 0</div>
+        <small>Final prices are confirmed by the server when your order is submitted.</small>
+      </div>
 
-      <label>M-Pesa Transaction Code</label>
-
-      <input type="text" id="mpesa"
-             placeholder="Enter M-Pesa code">
-
-    </div>
-
-    <label>Additional Instructions</label>
-
-    <textarea id="notes" rows="3"
-              placeholder="Any additional information (optional)"></textarea>
-
-    <div class="total">
-      Estimated Total: KSh
-      <span id="total">Select seed class</span>
-    </div>
-
-    <div id="status" class="status"
-         role="status" aria-live="polite"></div>
-
-    <button type="submit" id="submitButton"
-            class="submit-button">
-      PAY WITH M-PESA
-    </button>
-
-  </form>
-
-</section>
-
-<!-- PAYMENT INFORMATION -->
-
-<section class="section">
-
-  <div class="section-heading">
-    <h2>Secure Payment</h2>
-    <div class="heading-line"></div>
+      <button id="submitOrder" type="submit" class="btn btn-green">
+        Place Order
+      </button>
+    </form>
   </div>
-
-  <p>
-    ZetuPay M-Pesa payments are verified automatically after
-    successful payment confirmation.
-  </p>
-
-  <p>
-    Manual M-Pesa payments are subject to verification by our team.
-  </p>
-
-  <p class="small">
-    Do not submit the same order more than once while waiting
-    for payment confirmation.
-  </p>
-
 </section>
-
-<!-- CONTACT -->
-
-<section class="contact-section" id="contact">
-
-  <h2>Contact Kisima Certified Seeds</h2>
-
-  <p>Need help placing your order? Contact our team.</p>
-
-  <div class="contact-number">
-    📞 0715171470
-  </div>
-
-  <div class="contact-buttons">
-
-    <a class="btn whatsapp"
-       href="https://wa.me/254717592943"
-       target="_blank">
-      💬 CHAT WITH US ON WHATSAPP
-    </a>
-
-    <a class="btn phone"
-       href="tel:0715171470">
-      📞 CALL KISIMA
-    </a>
-
-  </div>
-
-</section>
-
-</div>
-
-<!-- FOOTER -->
 
 <footer>
-
-  <strong>KISIMA CERTIFIED SEEDS</strong>
-
-  <p>Viazi Soko</p>
-
-  <p>Quality Seeds. Better Harvests.</p>
-
-  <p>Call / WhatsApp: 0715171470</p>
-
-  <p>© 2026 Kisima Certified Seeds. All Rights Reserved.</p>
-
+  <h3>Kisima Certified Seeds</h3>
+  <p>Certified Potato Seeds • Farm Inputs • Agricultural Products</p>
+  <p>Call / WhatsApp: <strong>0715171470</strong></p>
+  <p>© <span id="year"></span> Kisima Certified Seeds</p>
 </footer>
 
-<!-- FLOATING WHATSAPP -->
-
-<a class="whatsapp-float"
-   href="https://wa.me/254717592943"
-   target="_blank"
-   aria-label="Chat with Kisima on WhatsApp">
-  ☎
+<a class="whatsapp" href="https://wa.me/254717592943" target="_blank" rel="noopener">
+  WhatsApp Us
 </a>
 
 <script>
-const bagsInput = document.getElementById('bags');
-const totalEl = document.getElementById('total');
-const varietyEl = document.getElementById('variety');
-const seedClassEl = document.getElementById('seedClass');
-const paymentMethod = document.getElementById('paymentMethod');
-const manualReference = document.getElementById('manualReference');
-const paymentInfo = document.getElementById('paymentInfo');
-const mpesaInput = document.getElementById('mpesa');
-const statusEl = document.getElementById('status');
-const submitButton = document.getElementById('submitButton');
-const orderForm = document.getElementById('orderForm');
+"use strict";
 
-const classPrices = {
+const CLASS_PRICES = {
   C1: 3750,
   C2: 3450,
   Basic: 4350,
   Prebasic: 4750
 };
 
-let paymentTimer = null;
-let availableProducts = [];
-let paymentAttempts = 0;
+const SEED_NAMES = [
+  "Unica",
+  "Shangi",
+  "Super Shangi",
+  "White Shangi",
+  "Dutch",
+  "Sheherekea",
+  "Stephen",
+  "Markies"
+];
 
-function updateTotal() {
-  const quantity = Number(bagsInput.value) || 0;
-  const price = classPrices[seedClassEl.value];
+let seedAvailability = {};
+let shopProducts = [];
+let cart = [];
 
-  totalEl.textContent = price
-    ? (quantity * price).toLocaleString('en-KE')
-    : 'Select seed class';
+const money = value =>
+  "KSh " + Number(value || 0).toLocaleString("en-KE");
+
+const escapeHTML = value =>
+  String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#39;"
+  }[char]));
+
+function showStatus(message, type="info") {
+  const box = document.getElementById("checkoutStatus");
+  box.className = "status show " + type;
+  box.textContent = message;
 }
 
-function showStatus(message) {
-  statusEl.textContent = message;
-  statusEl.style.display = 'block';
+function hideStatus() {
+  const box = document.getElementById("checkoutStatus");
+  box.className = "status";
+  box.textContent = "";
 }
 
-async function loadProducts() {
-  try {
-    const response = await fetch('/api/products');
-    if (!response.ok) throw new Error('Could not load varieties.');
-
-    availableProducts = await response.json();
-
-    const selected = availableProducts.find(
-      p => p.name === varietyEl.value
-    );
-
-    if (varietyEl.value && (!selected || !selected.available)) {
-      showStatus('This variety is currently unavailable. Please contact Kisima.');
-    }
-  } catch (e) {
-    showStatus('Could not check variety availability. Please refresh the page.');
-  }
-}
-
-function setPaymentMode() {
-  const manual = paymentMethod.value === 'manual';
-
-  manualReference.style.display = manual ? 'block' : 'none';
-  paymentInfo.style.display = manual ? 'none' : 'block';
-  mpesaInput.required = manual;
-
-  submitButton.textContent = manual
-    ? 'SUBMIT MANUAL PAYMENT FOR VERIFICATION'
-    : 'PAY WITH M-PESA';
-}
-
-function resetForm() {
-  orderForm.reset();
-  setPaymentMode();
-  updateTotal();
-  loadProducts();
-}
-
-function stopPaymentCheck() {
-  if (paymentTimer) {
-    clearInterval(paymentTimer);
-    paymentTimer = null;
-  }
-}
-
-async function checkPayment(orderId) {
-  stopPaymentCheck();
-  paymentAttempts = 0;
-
-  showStatus(
-    `Checking payment status for order ${orderId}...`
-  );
-
-  async function checkOnce() {
-    paymentAttempts++;
-
-    try {
-      const response = await fetch(
-        '/api/orders/' + encodeURIComponent(orderId) + '/payment',
-        { cache: 'no-store' }
-      );
-
-      const state = await response.json();
-
-      if (!response.ok) {
-        throw new Error(state.error || 'Payment status unavailable.');
-      }
-
-      if (state.paymentStatus === 'Verified') {
-        stopPaymentCheck();
-
-        showStatus(
-          `PAYMENT CONFIRMED! Order ${orderId} is PAID. Receipt: ${state.receipt || 'recorded'}. Please keep your order reference.`
-        );
-
-        submitButton.disabled = false;
-        return true;
-      }
-
-      if (state.paymentStatus === 'Rejected') {
-        stopPaymentCheck();
-
-        showStatus(
-          `Payment was not completed for order ${orderId}. If you paid, contact Kisima and provide this order reference.`
-        );
-
-        submitButton.disabled = false;
-        return true;
-      }
-
-    } catch (error) {
-      console.error('Payment check:', error.message);
-    }
-
-    if (paymentAttempts >= 36) {
-      stopPaymentCheck();
-
-      showStatus(
-        `Order ${orderId} is still awaiting payment confirmation. If you have already paid, do not submit another order. Contact Kisima with your order reference.`
-      );
-
-      submitButton.disabled = false;
-      return true;
-    }
-
-    return false;
-  }
-
-  const finished = await checkOnce();
-
-  if (!finished) {
-    paymentTimer = setInterval(checkOnce, 5000);
-  }
-}
-
-seedClassEl.addEventListener('change', updateTotal);
-bagsInput.addEventListener('input', updateTotal);
-varietyEl.addEventListener('change', loadProducts);
-paymentMethod.addEventListener('change', setPaymentMode);
-
-setPaymentMode();
-updateTotal();
-loadProducts();
-
-const returnParams = new URLSearchParams(window.location.search);
-const returnedOrderId = returnParams.get('orderId');
-const returnedPayment = returnParams.get('payment');
-
-if (returnedOrderId && returnedPayment === 'return') {
-  showStatus(
-    `You have returned from payment checkout. Checking your payment for order ${returnedOrderId}...`
-  );
-
-  submitButton.disabled = true;
-
-  document.getElementById('order').scrollIntoView({
-    behavior:'smooth'
-  });
-
-  checkPayment(returnedOrderId);
-
-  window.history.replaceState(
-    {},
-    document.title,
-    window.location.pathname
-  );
-}
-
-orderForm.addEventListener('submit', async function(e) {
-  e.preventDefault();
-
-  if (submitButton.disabled) return;
-
-  const payload = {
-    customer: document.getElementById('name').value.trim(),
-    phone: document.getElementById('phone').value.trim(),
-    email: document.getElementById('email').value.trim(),
-    seedClass: seedClassEl.value,
-    potatoSize: document.getElementById('potatoSize').value,
-    variety: varietyEl.value,
-    bags: Number(bagsInput.value),
-    location: document.getElementById('location').value.trim(),
-    delivery: document.getElementById('delivery').value,
-    notes: document.getElementById('notes').value.trim(),
-    mpesa: mpesaInput.value.trim()
-  };
-
-  if (
-    !payload.customer || !payload.phone || !payload.email ||
-    !payload.seedClass || !payload.potatoSize ||
-    !payload.variety || !payload.location || !payload.delivery ||
-    !Number.isInteger(payload.bags) ||
-    payload.bags < 1 || payload.bags > 500
-  ) {
-    showStatus('Please complete all required fields correctly.');
-    return;
-  }
-
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.email)) {
-    showStatus('Please enter a valid email address.');
-    return;
-  }
-
-  const isManual = paymentMethod.value === 'manual';
-
-  if (isManual && !/^[A-Za-z0-9]{8,15}$/.test(payload.mpesa)) {
-    showStatus('Enter a valid M-Pesa transaction code.');
-    return;
-  }
-
-  const selected = availableProducts.find(
-    p => p.name === payload.variety
-  );
-
-  if (!selected || !selected.available) {
-    showStatus('This variety is unavailable. Please contact Kisima.');
-    return;
-  }
-
-  submitButton.disabled = true;
-
-  showStatus(
-    isManual
-      ? 'Submitting your order for manual payment verification...'
-      : 'Creating your order and preparing secure ZetuPay checkout...'
-  );
+async function loadSeeds() {
+  const select = document.getElementById("seedVariety");
 
   try {
-    const endpoint = isManual
-      ? '/api/orders'
-      : '/api/orders/zetupay';
+    const response = await fetch("/api/products");
+    if (!response.ok) throw new Error("Unable to load seeds");
 
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+    const products = await response.json();
+
+    seedAvailability = {};
+    select.innerHTML = "";
+
+    products.forEach(product => {
+      seedAvailability[product.name] = !!product.available;
+
+      const option = document.createElement("option");
+      option.value = product.name;
+      option.textContent = product.name +
+        (product.available ? "" : " — OUT OF STOCK");
+      option.disabled = !product.available;
+      select.appendChild(option);
     });
 
-    const data = await response.json();
+    if (!products.length) {
+      select.innerHTML = '<option value="">No seeds available</option>';
+    }
+  } catch (error) {
+    select.innerHTML = "";
+    SEED_NAMES.forEach(name => {
+      const option = document.createElement("option");
+      option.value = name;
+      option.textContent = name;
+      select.appendChild(option);
+    });
+    showStatus("Could not load seed availability. Please refresh the page.", "error");
+  }
+}
+
+async function loadShopProducts() {
+  const container = document.getElementById("shopProducts");
+
+  try {
+    const response = await fetch("/api/shop/products");
+    if (!response.ok) throw new Error("Failed to load products");
+
+    shopProducts = await response.json();
+    renderShopProducts();
+  } catch (error) {
+    container.innerHTML = `
+      <div class="card">
+        <p>Farm shop products could not be loaded. Please refresh the page.</p>
+      </div>`;
+  }
+}
+
+function renderShopProducts() {
+  const container = document.getElementById("shopProducts");
+
+  if (!shopProducts.length) {
+    container.innerHTML = '<div class="card">No products found.</div>';
+    return;
+  }
+
+  container.innerHTML = shopProducts.map(product => `
+    <div class="card">
+      <div class="product-icon">
+        ${product.category === "Chemical" ? "🧪" : "🌾"}
+      </div>
+      <span class="badge">${escapeHTML(product.category)}</span>
+      <h3>${escapeHTML(product.name)}</h3>
+      <p>Per ${escapeHTML(product.unit)}</p>
+      <div class="price">${money(product.price)}</div>
+      ${
+        product.available
+          ? `
+            <div class="controls">
+              <label for="qty-${escapeHTML(product.id)}">Quantity</label>
+              <input id="qty-${escapeHTML(product.id)}"
+                type="number" min="1" max="500" value="1">
+              <button class="btn btn-green"
+                onclick="addProductToCart('${escapeHTML(product.id)}')">
+                Add to Cart
+              </button>
+            </div>
+          `
+          : `<p><strong>Currently unavailable</strong></p>`
+      }
+    </div>
+  `).join("");
+}
+
+function getSeedUnitPrice() {
+  return CLASS_PRICES[document.getElementById("seedClass").value] || 0;
+}
+
+function updateSeedPriceDisplay() {
+  const price = getSeedUnitPrice();
+  document.getElementById("seedPriceDisplay").textContent =
+    money(price) + " per 50kg bag";
+}
+
+document.getElementById("seedClass").addEventListener("change", updateSeedPriceDisplay);
+
+function addSeedToCart() {
+  const variety = document.getElementById("seedVariety").value;
+  const seedClass = document.getElementById("seedClass").value;
+  const potatoSize = document.getElementById("potatoSize").value;
+  const quantity = Number(document.getElementById("seedQuantity").value);
+
+  if (!variety) {
+    alert("Please select a potato variety.");
+    return;
+  }
+
+  if (seedAvailability[variety] === false) {
+    alert("This variety is currently unavailable.");
+    return;
+  }
+
+  if (!Number.isInteger(quantity) || quantity < 1 || quantity > 500) {
+    alert("Enter a valid number of bags between 1 and 500.");
+    return;
+  }
+
+  const existing = cart.find(item =>
+    item.type === "seed" &&
+    item.variety === variety &&
+    item.seedClass === seedClass &&
+    item.potatoSize === potatoSize
+  );
+
+  if (existing) {
+    existing.quantity += quantity;
+  } else {
+    cart.push({
+      type:"seed",
+      variety,
+      seedClass,
+      potatoSize,
+      quantity,
+      unitPrice:CLASS_PRICES[seedClass]
+    });
+  }
+
+  renderCart();
+  alert("Seeds added to your cart.");
+}
+
+function addProductToCart(productId) {
+  const product = shopProducts.find(p => p.id === productId);
+
+  if (!product || !product.available) {
+    alert("This product is currently unavailable.");
+    return;
+  }
+
+  const input = document.getElementById("qty-" + productId);
+  const quantity = Number(input ? input.value : 1);
+
+  if (!Number.isInteger(quantity) || quantity < 1 || quantity > 500) {
+    alert("Enter a quantity between 1 and 500.");
+    return;
+  }
+
+  const existing = cart.find(item =>
+    item.type === "product" && item.productId === productId
+  );
+
+  if (existing) {
+    existing.quantity += quantity;
+  } else {
+    cart.push({
+      type:"product",
+      productId,
+      name:product.name,
+      unit:product.unit,
+      quantity,
+      unitPrice:Number(product.price)
+    });
+  }
+
+  renderCart();
+  alert(product.name + " added to your cart.");
+}
+
+function getCartTotal() {
+  return cart.reduce((sum,item) =>
+    sum + (Number(item.unitPrice) * Number(item.quantity)), 0);
+}
+
+function getCartCount() {
+  return cart.reduce((sum,item) => sum + Number(item.quantity), 0);
+}
+
+function renderCart() {
+  const container = document.getElementById("cartItems");
+
+  document.getElementById("cartCount").textContent = getCartCount();
+
+  if (!cart.length) {
+    container.innerHTML = '<p class="empty">Your cart is empty.</p>';
+  } else {
+    container.innerHTML = cart.map((item,index) => {
+      const name = item.type === "seed"
+        ? item.variety + " Potato Seeds"
+        : item.name;
+
+      const detail = item.type === "seed"
+        ? `${item.seedClass} • ${item.potatoSize} • 50kg bag`
+        : `Farm Shop • ${item.unit}`;
+
+      const subtotal = item.unitPrice * item.quantity;
+
+      return `
+        <div class="cart-item">
+          <div>
+            <strong>${escapeHTML(name)}</strong>
+            <small>${escapeHTML(detail)}</small>
+            <small>${item.quantity} × ${money(item.unitPrice)}</small>
+            <strong>${money(subtotal)}</strong>
+          </div>
+          <button class="btn btn-danger" onclick="removeCartItem(${index})">
+            Remove
+          </button>
+        </div>
+      `;
+    }).join("");
+  }
+
+  const total = getCartTotal();
+  document.getElementById("cartTotal").textContent = "Total: " + money(total);
+  document.getElementById("checkoutTotal").textContent = money(total);
+}
+
+function removeCartItem(index) {
+  cart.splice(index,1);
+  renderCart();
+}
+
+function clearCart() {
+  if (!cart.length) return;
+  if (!confirm("Are you sure you want to clear your cart?")) return;
+  cart = [];
+  renderCart();
+}
+
+document.getElementById("paymentMethod").addEventListener("change", function() {
+  const manual = this.value === "Manual";
+  document.getElementById("manualMpesaBox").style.display = manual ? "block" : "none";
+  document.getElementById("mpesaCode").required = manual;
+});
+
+function buildOrderPayload() {
+  return {
+    customer:document.getElementById("customer").value.trim(),
+    phone:document.getElementById("phone").value.trim(),
+    email:document.getElementById("email").value.trim(),
+    location:document.getElementById("location").value.trim(),
+    delivery:document.getElementById("delivery").value,
+    notes:document.getElementById("notes").value.trim(),
+    items:cart.map(item => {
+      if (item.type === "seed") {
+        return {
+          type:"seed",
+          variety:item.variety,
+          seedClass:item.seedClass,
+          potatoSize:item.potatoSize,
+          quantity:item.quantity
+        };
+      }
+
+      return {
+        type:"product",
+        productId:item.productId,
+        quantity:item.quantity
+      };
+    })
+  };
+}
+
+function setSubmitting(isSubmitting) {
+  const button = document.getElementById("submitOrder");
+  button.disabled = isSubmitting;
+  button.textContent = isSubmitting ? "Submitting Order..." : "Place Order";
+}
+
+document.getElementById("checkoutForm").addEventListener("submit", async function(event) {
+  event.preventDefault();
+  hideStatus();
+
+  if (!cart.length) {
+    showStatus("Your cart is empty. Please add products before checkout.", "error");
+    return;
+  }
+
+  const paymentMethod = document.getElementById("paymentMethod").value;
+  const payload = buildOrderPayload();
+
+  if (paymentMethod === "Manual") {
+    payload.mpesa = document.getElementById("mpesaCode").value.trim().toUpperCase();
+
+    if (!/^[A-Z0-9]{8,15}$/.test(payload.mpesa)) {
+      showStatus("Enter a valid M-Pesa transaction code.", "error");
+      return;
+    }
+  }
+
+  setSubmitting(true);
+
+  try {
+    const endpoint = paymentMethod === "Manual"
+      ? "/api/shop/orders"
+      : "/api/shop/orders/zetupay";
+
+    const response = await fetch(endpoint, {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(payload)
+    });
+
+    const result = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-      throw new Error(data.error || 'Order submission failed.');
+      throw new Error(result.error || "Order could not be submitted.");
     }
 
-    if (isManual) {
+    if (paymentMethod === "ZetuPay") {
+      if (!result.checkoutUrl) {
+        throw new Error("Payment link was not returned. Please contact support.");
+      }
+
       showStatus(
-        `Order ${data.id} received. Total: KSh ${Number(data.total).toLocaleString('en-KE')}. Payment is pending manual verification.`
+        "Order " + result.id + " created. Redirecting to ZetuPay...",
+        "info"
       );
 
-      resetForm();
-      submitButton.disabled = false;
+      sessionStorage.setItem("kisima_shop_order_id",result.id);
+      window.location.href = result.checkoutUrl;
       return;
     }
 
-    if (!data.checkoutUrl) {
-      throw new Error('ZetuPay checkout link was not received.');
-    }
-
     showStatus(
-      `Order ${data.id} created. Total: KSh ${Number(data.total).toLocaleString('en-KE')}. Redirecting to secure ZetuPay checkout...`
+      "Order successfully received! Order reference: " +
+      result.id +
+      ". Payment is pending verification. Total: " +
+      money(result.total),
+      "success"
     );
 
-    window.location.href = data.checkoutUrl;
+    cart = [];
+    renderCart();
+    document.getElementById("checkoutForm").reset();
+    document.getElementById("manualMpesaBox").style.display = "none";
+
+    document.getElementById("checkoutStatus").scrollIntoView({
+      behavior:"smooth",
+      block:"center"
+    });
 
   } catch (error) {
-    showStatus(error.message || 'Something went wrong. Please try again.');
-    submitButton.disabled = false;
+    showStatus(error.message || "Something went wrong. Please try again.", "error");
+  } finally {
+    setSubmitting(false);
   }
 });
-</script>
 
+async function checkReturnedShopPayment(orderId) {
+  showStatus(
+    "Checking your ZetuPay payment for order " + orderId + "...",
+    "info"
+  );
+
+  let attempts = 0;
+  const maxAttempts = 12;
+
+  async function check() {
+    attempts++;
+
+    try {
+      const response = await fetch(
+        "/api/shop/orders/" + encodeURIComponent(orderId) + "/payment",
+        {cache:"no-store"}
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Payment status could not be checked.");
+      }
+
+      if (data.paymentStatus === "Verified") {
+        showStatus(
+          "PAYMENT CONFIRMED! Your order " + orderId +
+          " has been paid successfully. Thank you for shopping with Kisima Certified Seeds.",
+          "success"
+        );
+        sessionStorage.removeItem("kisima_shop_order_id");
+        cart = [];
+        renderCart();
+        return;
+      }
+
+      if (data.paymentStatus === "Rejected") {
+        showStatus(
+          "Payment was unsuccessful or cancelled. Your order reference is " +
+          orderId + ". You may try again or contact Kisima.",
+          "error"
+        );
+        return;
+      }
+
+      if (attempts < maxAttempts) {
+        showStatus(
+          "Payment is still being confirmed for " + orderId +
+          ". Checking again (" + attempts + "/" + maxAttempts + ")...",
+          "info"
+        );
+        setTimeout(check, 3000);
+      } else {
+        showStatus(
+          "Your payment is still pending. Order reference: " + orderId +
+          ". Please keep this reference and contact Kisima if needed.",
+          "info"
+        );
+      }
+
+    } catch (error) {
+      if (attempts < maxAttempts) {
+        setTimeout(check, 3000);
+      } else {
+        showStatus(
+          "We could not confirm your payment yet. Please keep your order reference: " +
+          orderId,
+          "error"
+        );
+      }
+    }
+  }
+
+  check();
+}
+
+function handlePaymentReturn() {
+  const params = new URLSearchParams(window.location.search);
+  const shopPayment = params.get("shopPayment");
+  const orderId = params.get("orderId");
+
+  if (shopPayment === "return" && orderId) {
+    checkReturnedShopPayment(orderId);
+
+    // Remove payment-return parameters from the URL.
+    window.history.replaceState({},document.title,window.location.pathname);
+  }
+}
+
+document.getElementById("year").textContent = new Date().getFullYear();
+
+loadSeeds();
+loadShopProducts();
+updateSeedPriceDisplay();
+renderCart();
+
+handlePaymentReturn();
+</script>
 </body>
 </html>
