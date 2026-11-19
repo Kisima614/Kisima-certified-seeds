@@ -176,7 +176,7 @@ async function init() {
     ADD COLUMN IF NOT EXISTS image TEXT NOT NULL DEFAULT '';
 
     CREATE TABLE IF NOT EXISTS shop_orders (
-      id TEXT PRIMARY KEY,
+      id TEXT PRIMARY PRIMARY KEY,
       customer TEXT NOT NULL,
       phone TEXT NOT NULL,
       email TEXT NOT NULL DEFAULT '',
@@ -395,7 +395,7 @@ async function verifyZetuPayPayment(paymentKey, expectedTotal) {
 }
 
 // =================================
-// VERIFY EXISTING SEED ZETUPAY
+// VERIFY SEED ZETUPAY PAYMENT
 // =================================
 
 async function markZetuPayOrderPaid(paymentKey, paymentData) {
@@ -489,7 +489,7 @@ async function updateZetuPayFailedStatus(orderId, payment) {
 }
 
 // =================================
-// VERIFY FARM SHOP ZETUPAY
+// VERIFY FARM SHOP ZETUPAY PAYMENT
 // =================================
 
 async function markShopOrderPaid(paymentKey, paymentData) {
@@ -874,71 +874,10 @@ async function getShopOrderDetails(b) {
 }
 
 // =================================
-// MANUAL M-PESA SEED ORDERS
-// =================================
-
-app.post('/api/orders', async (req, res) => {
-  const mpesa = clean(req.body?.mpesa, 40).toUpperCase();
-
-  if (!/^[A-Z0-9]{8,15}$/.test(mpesa)) {
-    return res.status(400).json({
-      error: 'Check the M-Pesa transaction reference format.'
-    });
-  }
-
-  try {
-    const o = await getOrderDetails(req.body || {});
-    const id = makeOrderId();
-
-    await pool.query(
-      `INSERT INTO orders
-       (id, customer, phone, email, location, seed_class,
-        variety, potato_size, bags, delivery, mpesa_ref,
-        notes, unit_price, total)
-       VALUES
-       ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`,
-      [
-        id,
-        o.customer,
-        o.phone,
-        o.email,
-        o.location,
-        o.seedClass,
-        o.variety,
-        o.potatoSize,
-        o.bags,
-        o.delivery,
-        mpesa,
-        o.notes,
-        o.unitPrice,
-        o.total
-      ]
-    );
-
-    return res.status(201).json({
-      id,
-      total: o.total,
-      unitPrice: o.unitPrice,
-      paymentStatus: 'Pending verification',
-      message: 'Order received. Payment is pending manual verification.'
-    });
-
-  } catch (e) {
-    console.error('ORDER SAVE ERROR:', e.message);
-
-    return res.status(400).json({
-      error: e.message
-    });
-  }
-});
-
-// =================================
 // SEED ZETUPAY CHECKOUT
 // =================================
 
 app.post('/api/orders/zetupay', async (req, res) => {
-  let orderId = null;
-
   try {
     const o = await getOrderDetails(req.body || {});
     const phone = normalizeKenyanPhone(o.phone);
@@ -955,7 +894,7 @@ app.post('/api/orders/zetupay', async (req, res) => {
       });
     }
 
-    orderId = makeOrderId();
+    const orderId = makeOrderId();
     const reference = makeZetuPayReference();
     const appUrl = getAppUrl();
 
@@ -1035,65 +974,10 @@ app.post('/api/orders/zetupay', async (req, res) => {
 });
 
 // =================================
-// FARM SHOP MANUAL M-PESA ORDER
-// =================================
-
-app.post('/api/shop/orders', async (req, res) => {
-  const mpesa = clean(req.body?.mpesa, 40).toUpperCase();
-
-  if (!/^[A-Z0-9]{8,15}$/.test(mpesa)) {
-    return res.status(400).json({
-      error: 'Check the M-Pesa transaction reference format.'
-    });
-  }
-
-  try {
-    const o = await getShopOrderDetails(req.body || {});
-    const id = makeOrderId();
-
-    await pool.query(
-      `INSERT INTO shop_orders
-       (id, customer, phone, email, location, delivery,
-        notes, items, total, mpesa_ref)
-       VALUES($1,$2,$3,$4,$5,$6,$7,$8::jsonb,$9,$10)`,
-      [
-        id,
-        o.customer,
-        o.phone,
-        o.email,
-        o.location,
-        o.delivery,
-        o.notes,
-        JSON.stringify(o.items),
-        o.total,
-        mpesa
-      ]
-    );
-
-    return res.status(201).json({
-      id,
-      items: o.items,
-      total: o.total,
-      paymentStatus: 'Pending verification',
-      message: 'Farm shop order received. Payment is pending verification.'
-    });
-
-  } catch (e) {
-    console.error('SHOP ORDER SAVE ERROR:', e.message);
-
-    return res.status(400).json({
-      error: e.message
-    });
-  }
-});
-
-// =================================
 // FARM SHOP ZETUPAY CHECKOUT
 // =================================
 
 app.post('/api/shop/orders/zetupay', async (req, res) => {
-  let orderId = null;
-
   try {
     const o = await getShopOrderDetails(req.body || {});
     const phone = normalizeKenyanPhone(o.phone);
@@ -1110,7 +994,7 @@ app.post('/api/shop/orders/zetupay', async (req, res) => {
       });
     }
 
-    orderId = makeOrderId();
+    const orderId = makeOrderId();
     const reference = makeZetuPayReference();
     const appUrl = getAppUrl();
 
@@ -1592,11 +1476,11 @@ app.patch('/api/admin/orders/:id', auth, async (req, res) => {
   try {
     const r = await pool.query(
       `UPDATE orders
-       SET payment_status = COALESCE($2, payment_status),
-           delivery_status = COALESCE($3, delivery_status)
-       WHERE id = $1
+       SET payment_status = COALESCE($1, payment_status),
+           delivery_status = COALESCE($2, delivery_status)
+       WHERE id = $3
        RETURNING id`,
-      [req.params.id, pay, del]
+      [pay, del, req.params.id]
     );
 
     if (!r.rowCount) {
@@ -1647,11 +1531,11 @@ app.patch('/api/admin/shop-orders/:id', auth, async (req, res) => {
   try {
     const r = await pool.query(
       `UPDATE shop_orders
-       SET payment_status = COALESCE($2, payment_status),
-           delivery_status = COALESCE($3, delivery_status)
-       WHERE id = $1
+       SET payment_status = COALESCE($1, payment_status),
+           delivery_status = COALESCE($2, delivery_status)
+       WHERE id = $3
        RETURNING id`,
-      [req.params.id, pay, del]
+      [pay, del, req.params.id]
     );
 
     if (!r.rowCount) {
