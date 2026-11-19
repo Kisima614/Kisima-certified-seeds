@@ -1,225 +1,1426 @@
- 
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#174d32">
-<title>Kisima Certified Seeds | Quality Potato Seeds</title>
+<meta name="theme-color" content="#103e26">
+
+<title>Kisima Certified Seeds | Viazi Soko</title>
+
+<meta name="description" content="Order certified potato seeds from Kisima Certified Seeds. Quality potato varieties, competitive prices and delivery across Kenya.">
 
 <style>
-*{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:#f5f8f4;color:#183326;line-height:1.6}
-header{background:#174d32;color:white;text-align:center;padding:28px 15px}
-header h1{margin:8px 0;font-size:28px}
-.logo{font-size:45px}
-nav{background:#103b26;padding:13px;text-align:center;position:sticky;top:0;z-index:5}
-nav a{color:white;text-decoration:none;margin:0 10px;font-size:14px}
-.hero{padding:45px 20px;text-align:center;background:linear-gradient(135deg,#e2efdf,#c4dfc0)}
-.hero h2{font-size:30px;color:#174d32}
-.container{max-width:950px;margin:auto;padding:22px}
-.section{background:white;padding:22px;margin:20px 0;border-radius:12px;box-shadow:0 2px 10px #00000010}
-h2{color:#174d32}
-.products{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
-.product{background:#edf5eb;padding:15px;border-radius:10px;text-align:center;font-weight:bold}
-label{display:block;margin-top:13px;font-weight:bold}
-input,select,textarea{width:100%;padding:13px;margin-top:5px;border:1px solid #ccc;border-radius:7px;font-size:16px;background:white}
-button,.btn{display:block;width:100%;padding:14px;margin-top:15px;background:#174d32;color:white;border:0;border-radius:8px;font-size:17px;font-weight:bold;text-align:center;text-decoration:none;cursor:pointer}
-button:disabled{opacity:.6;cursor:not-allowed}
-.total{background:#edf5eb;padding:15px;margin-top:15px;border-radius:8px;font-size:20px;font-weight:bold}
-.contact{background:#174d32;color:white;text-align:center;padding:25px;border-radius:10px}
-.contact h2{color:white}
-footer{background:#103b26;color:white;text-align:center;padding:20px;margin-top:25px}
-.small{font-size:13px;color:#666}
-.status{padding:12px;border-radius:8px;background:#edf5eb;margin-top:14px;display:none;overflow-wrap:anywhere}
-.payment-note{background:#edf5eb;padding:12px;border-radius:8px;margin-top:12px}
-table{width:100%;border-collapse:collapse;margin-top:15px}
-th,td{padding:11px;border:1px solid #dce6dc;text-align:center}
-th{background:#174d32;color:white}
+:root{
+  --green:#104b2b;
+  --dark:#07351d;
+  --mid:#1d6a3a;
+  --lime:#a7e635;
+  --light:#f3f8f1;
+  --white:#ffffff;
+  --text:#193525;
+  --muted:#64746a;
+  --border:#e1eae0;
+  --shadow:0 8px 30px rgba(0,0,0,.07);
+}
+
+*{
+  box-sizing:border-box;
+  scroll-behavior:smooth;
+}
+
+body{
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:var(--light);
+  color:var(--text);
+  line-height:1.6;
+}
+
+a{
+  text-decoration:none;
+}
+
+img{
+  max-width:100%;
+  display:block;
+}
+
+button,input,select,textarea{
+  font-family:inherit;
+}
+
+.topbar{
+  background:var(--dark);
+  color:white;
+  padding:9px 15px;
+  text-align:center;
+  font-size:12px;
+}
+
+.topbar-inner{
+  max-width:1200px;
+  margin:auto;
+  display:flex;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+.header{
+  background:white;
+  padding:15px 5%;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.brand-icon{
+  width:52px;
+  height:52px;
+  background:#e5f5d7;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:30px;
+}
+
+.brand-name{
+  font-size:20px;
+  font-weight:900;
+  line-height:1.1;
+  color:var(--green);
+}
+
+.brand-tag{
+  font-size:11px;
+  color:var(--mid);
+  font-weight:bold;
+  letter-spacing:1px;
+}
+
+.header-contact{
+  text-align:right;
+}
+
+.header-contact strong{
+  display:block;
+  color:var(--green);
+  font-size:18px;
+}
+
+.header-contact span{
+  font-size:12px;
+  color:var(--muted);
+}
+
+.nav{
+  position:sticky;
+  top:0;
+  z-index:100;
+  background:var(--dark);
+  display:flex;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:5px;
+  padding:12px 8px;
+  box-shadow:0 4px 12px rgba(0,0,0,.08);
+}
+
+.nav a{
+  color:white;
+  padding:10px 15px;
+  font-size:14px;
+  font-weight:bold;
+  border-radius:8px;
+}
+
+.nav a:hover{
+  background:var(--mid);
+}
+
+.nav .order-nav{
+  background:var(--lime);
+  color:var(--dark);
+}
+
+/* HERO */
+
+.hero{
+  position:relative;
+  min-height:500px;
+  display:flex;
+  align-items:center;
+  overflow:hidden;
+  color:white;
+  background:
+    linear-gradient(90deg,rgba(5,37,19,.95),rgba(8,48,25,.75),rgba(8,48,25,.25)),
+    url("assets/potato-farm.jpg") center/cover,
+    linear-gradient(135deg,#174d32,#3e824c);
+}
+
+.hero-content{
+  max-width:1200px;
+  width:100%;
+  margin:auto;
+  padding:55px 6%;
+}
+
+.hero-label{
+  display:inline-block;
+  background:rgba(167,230,53,.18);
+  color:#d7ff92;
+  border:1px solid rgba(167,230,53,.5);
+  border-radius:50px;
+  padding:7px 14px;
+  font-size:12px;
+  font-weight:bold;
+  margin-bottom:18px;
+}
+
+.hero h2{
+  font-size:clamp(32px,5vw,58px);
+  line-height:1.12;
+  max-width:700px;
+  margin:0 0 20px;
+  color:white;
+}
+
+.hero h2 span{
+  color:var(--lime);
+}
+
+.hero p{
+  max-width:620px;
+  font-size:18px;
+  color:#f1f6ef;
+}
+
+.hero-buttons{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  margin-top:28px;
+}
+
+.btn{
+  display:inline-flex;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  padding:15px 22px;
+  border-radius:10px;
+  font-size:15px;
+  font-weight:bold;
+  border:0;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.btn-primary{
+  background:var(--lime);
+  color:var(--dark);
+}
+
+.btn-primary:hover{
+  background:#b9f64c;
+  transform:translateY(-2px);
+}
+
+.btn-outline{
+  border:2px solid white;
+  color:white;
+  background:transparent;
+}
+
+.btn-outline:hover{
+  background:white;
+  color:var(--green);
+}
+
+.btn-green{
+  background:var(--green);
+  color:white;
+}
+
+.btn-green:hover{
+  background:var(--mid);
+}
+
+/* TRUST STRIP */
+
+.trust-strip{
+  background:white;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  padding:22px 5%;
+  gap:12px;
+  border-bottom:1px solid var(--border);
+}
+
+.trust-item{
+  text-align:center;
+  padding:8px;
+}
+
+.trust-icon{
+  font-size:27px;
+}
+
+.trust-item strong{
+  display:block;
+  color:var(--green);
+  font-size:14px;
+}
+
+.trust-item span{
+  color:var(--muted);
+  font-size:12px;
+}
+
+/* MAIN CONTENT */
+
+.container{
+  max-width:1200px;
+  margin:auto;
+  padding:25px 16px;
+}
+
+.section{
+  margin:30px 0;
+  background:white;
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:26px;
+  box-shadow:var(--shadow);
+}
+
+.section-heading{
+  margin-bottom:20px;
+}
+
+.section-heading h2{
+  margin:0;
+  color:var(--green);
+  font-size:27px;
+}
+
+.section-heading p{
+  margin:7px 0 0;
+  color:var(--muted);
+}
+
+.heading-line{
+  width:65px;
+  height:4px;
+  background:var(--lime);
+  border-radius:10px;
+  margin-top:10px;
+}
+
+/* VARIETIES */
+
+.products{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
+  gap:15px;
+}
+
+.product{
+  background:#f4f9f2;
+  border:1px solid #e3eee1;
+  border-radius:14px;
+  overflow:hidden;
+  transition:.2s;
+}
+
+.product:hover{
+  transform:translateY(-4px);
+  box-shadow:var(--shadow);
+}
+
+.product-image{
+  height:155px;
+  background:linear-gradient(135deg,#d7e9cd,#b8d4a8);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+
+.product-image img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.product-image .placeholder{
+  font-size:50px;
+}
+
+.product-info{
+  padding:14px;
+  text-align:center;
+}
+
+.product-info h3{
+  color:var(--green);
+  margin:0;
+  font-size:17px;
+}
+
+.product-info p{
+  font-size:12px;
+  color:var(--muted);
+  margin:5px 0 0;
+}
+
+/* ABOUT */
+
+.about-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:25px;
+  align-items:center;
+}
+
+.about-photo{
+  min-height:300px;
+  border-radius:14px;
+  overflow:hidden;
+  background:
+    linear-gradient(135deg,#c5e0b6,#6eaa65);
+}
+
+.about-photo img{
+  width:100%;
+  height:100%;
+  min-height:300px;
+  object-fit:cover;
+}
+
+.about-text h2{
+  color:var(--green);
+  font-size:27px;
+}
+
+.about-text p{
+  color:#52645a;
+}
+
+.feature-list{
+  padding:0;
+  list-style:none;
+}
+
+.feature-list li{
+  padding:8px 0;
+  font-weight:bold;
+}
+
+.feature-list li:before{
+  content:"✓";
+  color:#319349;
+  font-weight:bold;
+  margin-right:10px;
+}
+
+/* PRICES */
+
+.price-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:15px;
+}
+
+.price-card{
+  border-radius:14px;
+  background:#f3f9ef;
+  border:1px solid #e1eddb;
+  padding:22px;
+  text-align:center;
+}
+
+.price-card h3{
+  color:var(--green);
+  margin:0 0 10px;
+}
+
+.price-card .price{
+  font-size:27px;
+  font-weight:900;
+  color:var(--green);
+}
+
+.price-card p{
+  font-size:13px;
+  color:var(--muted);
+}
+
+.price-note{
+  background:#eaf6df;
+  padding:12px;
+  border-radius:9px;
+  margin-top:15px;
+  text-align:center;
+  font-weight:bold;
+}
+
+/* OFFER */
+
+.offer{
+  background:linear-gradient(135deg,#fff8dd,#ffefb5);
+  border:1px solid #f1df9a;
+  border-radius:16px;
+  padding:25px;
+}
+
+.offer h2{
+  color:#8b5700;
+  margin-top:0;
+}
+
+.offer-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:15px;
+}
+
+.offer-card{
+  background:white;
+  padding:18px;
+  border-radius:12px;
+  text-align:center;
+}
+
+.offer-card strong{
+  display:block;
+  font-size:19px;
+  color:#a26400;
+}
+
+.offer-card span{
+  font-size:14px;
+}
+
+/* DELIVERY */
+
+.delivery-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  gap:15px;
+}
+
+.delivery-card{
+  background:#f3f8f1;
+  padding:20px;
+  text-align:center;
+  border-radius:12px;
+}
+
+.delivery-card .icon{
+  font-size:35px;
+}
+
+.delivery-card h3{
+  color:var(--green);
+  font-size:16px;
+}
+
+/* ORDER FORM */
+
+#order{
+  border:2px solid #dcebd7;
+}
+
+.form-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:0 16px;
+}
+
+label{
+  display:block;
+  margin-top:13px;
+  font-weight:bold;
+  font-size:14px;
+  color:var(--green);
+}
+
+input,select,textarea{
+  width:100%;
+  padding:13px;
+  margin-top:6px;
+  border:1px solid #cbd9cc;
+  border-radius:9px;
+  font-size:16px;
+  background:white;
+  color:#193525;
+}
+
+input:focus,select:focus,textarea:focus{
+  outline:2px solid #b4e56b;
+  border-color:var(--green);
+}
+
+.total{
+  background:#eaf6df;
+  border:1px solid #d6e9c9;
+  padding:18px;
+  margin-top:18px;
+  border-radius:12px;
+  font-size:21px;
+  font-weight:bold;
+  color:var(--green);
+}
+
+.status{
+  padding:13px;
+  border-radius:9px;
+  background:#edf5eb;
+  margin-top:14px;
+  display:none;
+  overflow-wrap:anywhere;
+}
+
+.payment-note{
+  background:#edf5eb;
+  padding:15px;
+  border-radius:10px;
+  margin-top:15px;
+}
+
+.payment-note strong{
+  color:var(--green);
+}
+
+.submit-button{
+  background:var(--green);
+  color:white;
+  border:0;
+  border-radius:10px;
+  width:100%;
+  padding:17px;
+  font-size:17px;
+  font-weight:bold;
+  margin-top:20px;
+  cursor:pointer;
+}
+
+.submit-button:hover{
+  background:var(--mid);
+}
+
+.submit-button:disabled{
+  opacity:.6;
+  cursor:not-allowed;
+}
+
+/* CONTACT */
+
+.contact-section{
+  background:linear-gradient(135deg,#0b3c21,#1d6a3a);
+  color:white;
+  text-align:center;
+  padding:35px 22px;
+  border-radius:18px;
+}
+
+.contact-section h2{
+  color:white;
+}
+
+.contact-number{
+  font-size:24px;
+  font-weight:bold;
+}
+
+.contact-buttons{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  justify-content:center;
+  margin-top:20px;
+}
+
+.contact-buttons .btn{
+  min-width:200px;
+}
+
+.whatsapp{
+  background:#22a75a;
+  color:white;
+}
+
+.phone{
+  background:white;
+  color:var(--green);
+}
+
+/* FOOTER */
+
+footer{
+  background:#07351d;
+  color:white;
+  text-align:center;
+  padding:30px 15px;
+}
+
+footer strong{
+  font-size:18px;
+}
+
+footer p{
+  font-size:13px;
+  color:#cbd9cf;
+}
+
+/* FLOATING WHATSAPP */
+
+.whatsapp-float{
+  position:fixed;
+  right:16px;
+  bottom:18px;
+  z-index:999;
+  width:58px;
+  height:58px;
+  background:#20b85a;
+  color:white;
+  border-radius:50%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:29px;
+  box-shadow:0 4px 15px #0003;
+}
+
+/* MOBILE */
+
+@media(max-width:700px){
+
+  .topbar-inner{
+    justify-content:center;
+  }
+
+  .header{
+    padding:12px;
+  }
+
+  .brand-icon{
+    width:42px;
+    height:42px;
+    font-size:25px;
+  }
+
+  .brand-name{
+    font-size:16px;
+  }
+
+  .header-contact strong{
+    font-size:15px;
+  }
+
+  .header-contact span{
+    font-size:10px;
+  }
+
+  .nav{
+    justify-content:flex-start;
+    overflow-x:auto;
+    flex-wrap:nowrap;
+    white-space:nowrap;
+    padding:10px 5px;
+  }
+
+  .nav a{
+    font-size:12px;
+    padding:9px 12px;
+  }
+
+  .hero{
+    min-height:440px;
+  }
+
+  .hero-content{
+    padding:45px 20px;
+  }
+
+  .hero h2{
+    font-size:36px;
+  }
+
+  .hero p{
+    font-size:16px;
+  }
+
+  .hero-buttons{
+    flex-direction:column;
+  }
+
+  .hero-buttons .btn{
+    width:100%;
+  }
+
+  .trust-strip{
+    grid-template-columns:1fr 1fr;
+    padding:15px 8px;
+  }
+
+  .trust-item{
+    border-bottom:1px solid #edf0ed;
+  }
+
+  .container{
+    padding:12px;
+  }
+
+  .section{
+    padding:18px;
+    margin:18px 0;
+  }
+
+  .section-heading h2{
+    font-size:23px;
+  }
+
+  .products{
+    grid-template-columns:repeat(2,1fr);
+    gap:10px;
+  }
+
+  .product-image{
+    height:125px;
+  }
+
+  .product-info{
+    padding:11px;
+  }
+
+  .about-grid{
+    grid-template-columns:1fr;
+  }
+
+  .about-photo,
+  .about-photo img{
+    min-height:220px;
+  }
+
+  .offer-grid{
+    grid-template-columns:1fr;
+  }
+
+  .form-grid{
+    grid-template-columns:1fr;
+  }
+
+  .contact-number{
+    font-size:21px;
+  }
+
+  table{
+    font-size:12px;
+  }
+
+  th,td{
+    padding:8px 4px;
+  }
+
+  .whatsapp-float{
+    width:52px;
+    height:52px;
+    right:12px;
+    bottom:12px;
+  }
+}
+
+@media(max-width:360px){
+  .hero h2{
+    font-size:30px;
+  }
+
+  .products{
+    grid-template-columns:1fr 1fr;
+  }
+}
 </style>
 </head>
 
 <body>
 
-<header>
-<div class="logo">🌱</div>
-<h1>KISIMA CERTIFIED SEEDS</h1>
-<p>Quality Potato Seeds for Better Harvests</p>
-<p>Certified and approved seed varieties</p>
+<!-- TOP BAR -->
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <span>🌱 Certified Potato Seeds</span>
+    <span>✔ Quality Seed Varieties</span>
+    <span>🚚 Delivery Across Kenya</span>
+  </div>
+</div>
+
+<!-- HEADER -->
+
+<header class="header">
+
+  <div class="brand">
+    <div class="brand-icon">🌱</div>
+    <div>
+      <div class="brand-name">KISIMA</div>
+      <div class="brand-name">CERTIFIED SEEDS</div>
+      <div class="brand-tag">VIAZI SOKO</div>
+    </div>
+  </div>
+
+  <div class="header-contact">
+    <span>Call / WhatsApp</span>
+    <strong>0715171470</strong>
+  </div>
+
 </header>
 
-<nav>
-<a href="#home">Home</a>
-<a href="#varieties">Varieties</a>
-<a href="#prices">Prices</a>
-<a href="#order">Order</a>
-<a href="#contact">Contact</a>
+<!-- NAVIGATION -->
+
+<nav class="nav">
+  <a href="#home">Home</a>
+  <a href="#varieties">Varieties</a>
+  <a href="#prices">Prices</a>
+  <a href="#order">Order Seeds</a>
+  <a href="#delivery">Delivery</a>
+  <a href="#contact">Contact</a>
 </nav>
 
+<!-- HERO -->
+
 <section class="hero" id="home">
-<h2>Welcome to Kisima Certified Seeds</h2>
-<p>Your trusted source for quality certified potato seeds.</p>
-<p>Order your preferred variety and arrange delivery to your location.</p>
-<a class="btn" href="#order">ORDER YOUR SEEDS NOW</a>
+
+  <div class="hero-content">
+
+    <div class="hero-label">
+      QUALITY CERTIFIED POTATO SEEDS
+    </div>
+
+    <h2>
+      Certified Potato Seeds for
+      <span>Higher Yields & Better Profits</span>
+    </h2>
+
+    <p>
+      Quality potato seeds for farmers across Kenya.
+      Choose your preferred variety, place your order,
+      and arrange delivery to your location.
+    </p>
+
+    <div class="hero-buttons">
+      <a href="#order" class="btn btn-primary">
+        🛒 ORDER SEEDS NOW
+      </a>
+
+      <a href="https://wa.me/254717592943"
+         class="btn btn-outline"
+         target="_blank">
+        💬 CHAT ON WHATSAPP
+      </a>
+    </div>
+
+  </div>
+
+</section>
+
+<!-- TRUST FEATURES -->
+
+<section class="trust-strip">
+
+  <div class="trust-item">
+    <div class="trust-icon">🌱</div>
+    <strong>Quality Seeds</strong>
+    <span>Carefully selected varieties</span>
+  </div>
+
+  <div class="trust-item">
+    <div class="trust-icon">🥔</div>
+    <strong>Potato Varieties</strong>
+    <span>Varieties for farmers</span>
+  </div>
+
+  <div class="trust-item">
+    <div class="trust-icon">🚚</div>
+    <strong>Countrywide Delivery</strong>
+    <span>Delivery arrangements available</span>
+  </div>
+
+  <div class="trust-item">
+    <div class="trust-icon">📞</div>
+    <strong>Customer Support</strong>
+    <span>Talk to our team</span>
+  </div>
+
 </section>
 
 <div class="container">
 
-<section class="section" id="varieties">
-<h2>Our Potato Seed Varieties</h2>
+<!-- VARIETIES -->
 
-<div class="products">
-<div class="product">🥔<br>Unica</div>
-<div class="product">🥔<br>Shangi</div>
-<div class="product">🥔<br>Super Shangi</div>
-<div class="product">🥔<br>White Shangi</div>
-<div class="product">🥔<br>Dutch</div>
-<div class="product">🥔<br>Sheherekea</div>
-<div class="product">🥔<br>Stephen</div>
-<div class="product">🥔<br>Markies</div>
-</div>
+<section class="section" id="varieties">
+
+  <div class="section-heading">
+    <h2>Our Potato Seed Varieties</h2>
+    <p>Choose the variety that suits your farming needs.</p>
+    <div class="heading-line"></div>
+  </div>
+
+  <div class="products">
+
+    <div class="product">
+      <div class="product-image">
+        <div class="placeholder">🥔</div>
+      </div>
+      <div class="product-info">
+        <h3>Unica</h3>
+        <p>Certified potato seeds</p>
+      </div>
+    </div>
+
+    <div class="product">
+      <div class="product-image">
+        <div class="placeholder">🥔</div>
+      </div>
+      <div class="product-info">
+        <h3>Shangi</h3>
+        <p>Popular potato variety</p>
+      </div>
+    </div>
+
+    <div class="product">
+      <div class="product-image">
+        <div class="placeholder">🥔</div>
+      </div>
+      <div class="product-info">
+        <h3>Super Shangi</h3>
+        <p>Quality seed variety</p>
+      </div>
+    </div>
+
+    <div class="product">
+      <div class="product-image">
+        <div class="placeholder">🥔</div>
+      </div>
+      <div class="product-info">
+        <h3>White Shangi</h3>
+        <p>Quality potato seeds</p>
+      </div>
+    </div>
+
+    <div class="product">
+      <div class="product-image">
+        <div class="placeholder">🥔</div>
+      </div>
+      <div class="product-info">
+        <h3>Dutch</h3>
+        <p>Certified seed variety</p>
+      </div>
+    </div>
+
+    <div class="product">
+      <div class="product-image">
+        <div class="placeholder">🥔</div>
+      </div>
+      <div class="product-info">
+        <h3>Sheherekea</h3>
+        <p>Quality potato seeds</p>
+      </div>
+    </div>
+
+    <div class="product">
+      <div class="product-image">
+        <div class="placeholder">🥔</div>
+      </div>
+      <div class="product-info">
+        <h3>Stephen</h3>
+        <p>Certified seed variety</p>
+      </div>
+    </div>
+
+    <div class="product">
+      <div class="product-image">
+        <div class="placeholder">🥔</div>
+      </div>
+      <div class="product-info">
+        <h3>Markies</h3>
+        <p>Quality potato seeds</p>
+      </div>
+    </div>
+
+  </div>
+
 </section>
+
+<!-- ABOUT / QUALITY -->
+
+<section class="section">
+
+  <div class="about-grid">
+
+    <div class="about-photo">
+      <img
+        src="assets/potato-farm.jpg"
+        alt="Kisima potato farm"
+        onerror="this.style.display='none'">
+    </div>
+
+    <div class="about-text">
+
+      <h2>Grow with Quality Seeds</h2>
+
+      <p>
+        At Kisima Certified Seeds, we are committed to helping farmers
+        access quality potato seed varieties for their farming needs.
+      </p>
+
+      <p>
+        We make it easy to select your preferred variety, choose your
+        seed class, and place your order conveniently online.
+      </p>
+
+      <ul class="feature-list">
+        <li>Quality potato seed varieties</li>
+        <li>Convenient online ordering</li>
+        <li>50 kg seed bags</li>
+        <li>Delivery arrangements across Kenya</li>
+        <li>Customer support when you need us</li>
+      </ul>
+
+    </div>
+
+  </div>
+
+</section>
+
+<!-- PRICES -->
 
 <section class="section" id="prices">
-<h2>Seed Prices</h2>
-<p>All prices are per 50kg bag. Same prices apply to Size 1 and Size 2.</p>
 
-<table>
-<thead>
-<tr>
-<th>Seed Class</th>
-<th>Size 1</th>
-<th>Size 2</th>
-</tr>
-</thead>
+  <div class="section-heading">
+    <h2>Our Seed Prices</h2>
+    <p>Prices per 50 kg bag</p>
+    <div class="heading-line"></div>
+  </div>
 
-<tbody>
-<tr><td>Generation 1 (C1)</td><td>KSh 3,750</td><td>KSh 3,750</td></tr>
-<tr><td>Generation 2 (C2)</td><td>KSh 3,450</td><td>KSh 3,450</td></tr>
-<tr><td>Basic</td><td>KSh 4,350</td><td>KSh 4,350</td></tr>
-<tr><td>Prebasic</td><td>KSh 4,750</td><td>KSh 4,750</td></tr>
-</tbody>
-</table>
+  <div class="price-grid">
 
-<p class="small">All seed bags are supplied in certified 50kg packaging.</p>
+    <div class="price-card">
+      <h3>Generation 1 (C1)</h3>
+      <div class="price">KSh 3,750</div>
+      <p>Per 50 kg bag</p>
+    </div>
+
+    <div class="price-card">
+      <h3>Generation 2 (C2)</h3>
+      <div class="price">KSh 3,450</div>
+      <p>Per 50 kg bag</p>
+    </div>
+
+    <div class="price-card">
+      <h3>Basic</h3>
+      <div class="price">KSh 4,350</div>
+      <p>Per 50 kg bag</p>
+    </div>
+
+    <div class="price-card">
+      <h3>Prebasic</h3>
+      <div class="price">KSh 4,750</div>
+      <p>Per 50 kg bag</p>
+    </div>
+
+  </div>
+
+  <div class="price-note">
+    All seed bags are supplied in certified 50 kg packaging.
+    Same prices apply to Size 1 and Size 2.
+  </div>
+
 </section>
+
+<!-- SPECIAL OFFER -->
+
+<section class="section">
+
+  <div class="offer">
+
+    <h2>🎁 Special Fertilizer Offers</h2>
+
+    <div class="offer-grid">
+
+      <div class="offer-card">
+        <strong>Buy 5 Bags</strong>
+        <span>Get 1 bag of fertilizer FREE</span>
+      </div>
+
+      <div class="offer-card">
+        <strong>Buy 10 Bags or More</strong>
+        <span>Get 3 bags of fertilizer FREE</span>
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+<!-- DELIVERY -->
+
+<section class="section" id="delivery">
+
+  <div class="section-heading">
+    <h2>Delivery Across Kenya</h2>
+    <p>We help farmers arrange delivery to their preferred locations.</p>
+    <div class="heading-line"></div>
+  </div>
+
+  <div class="delivery-grid">
+
+    <div class="delivery-card">
+      <div class="icon">🇰🇪</div>
+      <h3>Countrywide Coverage</h3>
+      <p>Delivery arrangements across Kenya.</p>
+    </div>
+
+    <div class="delivery-card">
+      <div class="icon">🚚</div>
+      <h3>Convenient Delivery</h3>
+      <p>Provide your location when placing your order.</p>
+    </div>
+
+    <div class="delivery-card">
+      <div class="icon">📦</div>
+      <h3>50 kg Bags</h3>
+      <p>Seed packaging for your order.</p>
+    </div>
+
+  </div>
+
+</section>
+
+<!-- ORDER FORM -->
 
 <section class="section" id="order">
-<h2>Place Your Order</h2>
-<p>Select your preferred variety, seed class and potato size.</p>
 
-<form id="orderForm">
+  <div class="section-heading">
+    <h2>Place Your Seed Order</h2>
+    <p>Complete the form below to order your preferred potato seeds.</p>
+    <div class="heading-line"></div>
+  </div>
 
-<label>Full Name</label>
-<input type="text" id="name" placeholder="Enter your full name" required>
+  <form id="orderForm">
 
-<label>Phone Number for M-Pesa</label>
-<input type="tel" id="phone" placeholder="07XXXXXXXX or 2547XXXXXXXX" required>
+    <div class="form-grid">
 
-<label>Email Address</label>
-<input type="email" id="email" placeholder="Enter your email address" required>
+      <div>
+        <label>Full Name</label>
+        <input type="text" id="name"
+               placeholder="Enter your full name" required>
+      </div>
 
-<label>Seed Class</label>
-<select id="seedClass" required>
-<option value="">Select seed class</option>
-<option value="C1">Generation 1 (C1)</option>
-<option value="C2">Generation 2 (C2)</option>
-<option value="Basic">Basic</option>
-<option value="Prebasic">Prebasic</option>
-</select>
+      <div>
+        <label>Phone Number for M-Pesa</label>
+        <input type="tel" id="phone"
+               placeholder="07XXXXXXXX or 2547XXXXXXXX" required>
+      </div>
 
-<label>Potato Size</label>
-<select id="potatoSize" required>
-<option value="">Select potato size</option>
-<option value="Size 1">Size 1</option>
-<option value="Size 2">Size 2</option>
-</select>
+      <div>
+        <label>Email Address</label>
+        <input type="email" id="email"
+               placeholder="Enter your email address" required>
+      </div>
 
-<label>Potato Variety</label>
-<select id="variety" required>
-<option value="">Select variety</option>
-<option>Unica</option>
-<option>Shangi</option>
-<option>Super Shangi</option>
-<option>White Shangi</option>
-<option>Dutch</option>
-<option>Sheherekea</option>
-<option>Stephen</option>
-<option>Markies</option>
-</select>
+      <div>
+        <label>Seed Class</label>
+        <select id="seedClass" required>
+          <option value="">Select seed class</option>
+          <option value="C1">Generation 1 (C1)</option>
+          <option value="C2">Generation 2 (C2)</option>
+          <option value="Basic">Basic</option>
+          <option value="Prebasic">Prebasic</option>
+        </select>
+      </div>
 
-<label>Number of 50kg Bags</label>
-<input type="number" id="bags" min="1" max="500" value="1" required>
+      <div>
+        <label>Potato Size</label>
+        <select id="potatoSize" required>
+          <option value="">Select potato size</option>
+          <option value="Size 1">Size 1</option>
+          <option value="Size 2">Size 2</option>
+        </select>
+      </div>
 
-<label>Delivery Location</label>
-<input type="text" id="location" placeholder="Town, county or delivery point" required>
+      <div>
+        <label>Potato Variety</label>
+        <select id="variety" required>
+          <option value="">Select variety</option>
+          <option>Unica</option>
+          <option>Shangi</option>
+          <option>Super Shangi</option>
+          <option>White Shangi</option>
+          <option>Dutch</option>
+          <option>Sheherekea</option>
+          <option>Stephen</option>
+          <option>Markies</option>
+        </select>
+      </div>
 
-<label>Delivery Method</label>
-<select id="delivery" required>
-<option value="">Select delivery method</option>
-<option value="Delivery">Delivery</option>
-<option value="Collection">Collection</option>
-</select>
+      <div>
+        <label>Number of 50 kg Bags</label>
+        <input type="number" id="bags"
+               min="1" max="500" value="1" required>
+      </div>
 
-<label>Payment Method</label>
-<select id="paymentMethod" required>
-<option value="zetupay">ZetuPay M-Pesa payment</option>
-<option value="manual">I have already paid manually</option>
-</select>
+      <div>
+        <label>Delivery Location</label>
+        <input type="text" id="location"
+               placeholder="Town, county or delivery point" required>
+      </div>
 
-<div class="payment-note" id="paymentInfo">
-<strong>ZetuPay M-Pesa</strong>
-<p>You will be redirected to the secure ZetuPay payment page to complete your M-Pesa payment.</p>
-<p>Your payment will be verified automatically after confirmation.</p>
-</div>
+      <div>
+        <label>Delivery Method</label>
+        <select id="delivery" required>
+          <option value="">Select delivery method</option>
+          <option value="Delivery">Delivery</option>
+          <option value="Collection">Collection</option>
+        </select>
+      </div>
 
-<div id="manualReference" style="display:none">
-<label>M-Pesa Transaction Code</label>
-<input type="text" id="mpesa" placeholder="Enter M-Pesa code">
-</div>
+      <div>
+        <label>Payment Method</label>
+        <select id="paymentMethod" required>
+          <option value="zetupay">ZetuPay M-Pesa payment</option>
+          <option value="manual">I have already paid manually</option>
+        </select>
+      </div>
 
-<label>Additional Instructions</label>
-<textarea id="notes" rows="3" placeholder="Any additional information (optional)"></textarea>
+    </div>
 
-<div class="total">
-Estimated Total: KSh <span id="total">Select seed class</span>
-</div>
+    <div class="payment-note" id="paymentInfo">
+      <strong>ZetuPay M-Pesa</strong>
+      <p>You will be redirected to the secure ZetuPay payment page to complete your M-Pesa payment.</p>
+      <p>Your payment will be verified automatically after confirmation.</p>
+    </div>
 
-<div id="status" class="status" role="status" aria-live="polite"></div>
+    <div id="manualReference" style="display:none">
 
-<button type="submit" id="submitButton">PAY WITH M-PESA</button>
-</form>
+      <label>M-Pesa Transaction Code</label>
+
+      <input type="text" id="mpesa"
+             placeholder="Enter M-Pesa code">
+
+    </div>
+
+    <label>Additional Instructions</label>
+
+    <textarea id="notes" rows="3"
+              placeholder="Any additional information (optional)"></textarea>
+
+    <div class="total">
+      Estimated Total: KSh
+      <span id="total">Select seed class</span>
+    </div>
+
+    <div id="status" class="status"
+         role="status" aria-live="polite"></div>
+
+    <button type="submit" id="submitButton"
+            class="submit-button">
+      PAY WITH M-PESA
+    </button>
+
+  </form>
+
 </section>
+
+<!-- PAYMENT INFORMATION -->
 
 <section class="section">
-<h2>M-Pesa Payment Information</h2>
-<p>ZetuPay M-Pesa payments are verified automatically after successful payment confirmation.</p>
-<p>Manual M-Pesa payments are subject to verification by our team.</p>
-<p class="small">Do not submit the same order more than once while waiting for payment confirmation.</p>
+
+  <div class="section-heading">
+    <h2>Secure Payment</h2>
+    <div class="heading-line"></div>
+  </div>
+
+  <p>
+    ZetuPay M-Pesa payments are verified automatically after
+    successful payment confirmation.
+  </p>
+
+  <p>
+    Manual M-Pesa payments are subject to verification by our team.
+  </p>
+
+  <p class="small">
+    Do not submit the same order more than once while waiting
+    for payment confirmation.
+  </p>
+
 </section>
 
-<section class="section">
-<h2>Delivery Information</h2>
-<p>Countrywide delivery available.</p>
-<p>Contact our team to confirm delivery arrangements, transport charges and schedules.</p>
-</section>
+<!-- CONTACT -->
 
-<section class="contact" id="contact">
-<h2>Contact Kisima Certified Seeds</h2>
-<p>Call: 0715171470</p>
-<p>WhatsApp: 0717592943</p>
+<section class="contact-section" id="contact">
 
-<a class="btn" style="background:#25a65a" href="https://wa.me/254717592943">CHAT WITH US ON WHATSAPP</a>
-<a class="btn" style="background:#2469a5" href="tel:0715171470">CALL KISIMA</a>
+  <h2>Contact Kisima Certified Seeds</h2>
+
+  <p>Need help placing your order? Contact our team.</p>
+
+  <div class="contact-number">
+    📞 0715171470
+  </div>
+
+  <div class="contact-buttons">
+
+    <a class="btn whatsapp"
+       href="https://wa.me/254717592943"
+       target="_blank">
+      💬 CHAT WITH US ON WHATSAPP
+    </a>
+
+    <a class="btn phone"
+       href="tel:0715171470">
+      📞 CALL KISIMA
+    </a>
+
+  </div>
+
 </section>
 
 </div>
+
+<!-- FOOTER -->
 
 <footer>
-<strong>KISIMA CERTIFIED SEEDS</strong>
-<p>Quality Seeds. Better Harvests.</p>
-<p>© 2026 Kisima Certified Seeds. All Rights Reserved.</p>
+
+  <strong>KISIMA CERTIFIED SEEDS</strong>
+
+  <p>Viazi Soko</p>
+
+  <p>Quality Seeds. Better Harvests.</p>
+
+  <p>Call / WhatsApp: 0715171470</p>
+
+  <p>© 2026 Kisima Certified Seeds. All Rights Reserved.</p>
+
 </footer>
+
+<!-- FLOATING WHATSAPP -->
+
+<a class="whatsapp-float"
+   href="https://wa.me/254717592943"
+   target="_blank"
+   aria-label="Chat with Kisima on WhatsApp">
+  ☎
+</a>
 
 <script>
 const bagsInput = document.getElementById('bags');
@@ -304,10 +1505,6 @@ function stopPaymentCheck() {
   }
 }
 
-/*
-  Checks payment after the customer returns to the website.
-  It does NOT start before the customer visits ZetuPay.
-*/
 async function checkPayment(orderId) {
   stopPaymentCheck();
   paymentAttempts = 0;
@@ -371,7 +1568,6 @@ async function checkPayment(orderId) {
     return false;
   }
 
-  // Check immediately when the customer returns.
   const finished = await checkOnce();
 
   if (!finished) {
@@ -388,11 +1584,6 @@ setPaymentMode();
 updateTotal();
 loadProducts();
 
-/*
-  Payment-return handling.
-  The backend should return customers to:
-  /?payment=return&orderId=ORDER_ID
-*/
 const returnParams = new URLSearchParams(window.location.search);
 const returnedOrderId = returnParams.get('orderId');
 const returnedPayment = returnParams.get('payment');
@@ -404,12 +1595,12 @@ if (returnedOrderId && returnedPayment === 'return') {
 
   submitButton.disabled = true;
 
-  // Scroll the customer to the order status.
-  document.getElementById('order').scrollIntoView({behavior:'smooth'});
+  document.getElementById('order').scrollIntoView({
+    behavior:'smooth'
+  });
 
   checkPayment(returnedOrderId);
 
-  // Clean the URL after reading the payment-return parameters.
   window.history.replaceState(
     {},
     document.title,
@@ -511,10 +1702,6 @@ orderForm.addEventListener('submit', async function(e) {
       `Order ${data.id} created. Total: KSh ${Number(data.total).toLocaleString('en-KE')}. Redirecting to secure ZetuPay checkout...`
     );
 
-    /*
-      Redirect to ZetuPay.
-      Payment verification will happen after the customer returns.
-    */
     window.location.href = data.checkoutUrl;
 
   } catch (error) {
