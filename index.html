@@ -286,6 +286,10 @@ textarea {
   border:1px solid #d8e7d8;
 }
 
+.payment-box p {
+  line-height:1.6;
+}
+
 .status {
   padding:14px;
   border-radius:10px;
@@ -511,21 +515,15 @@ button:disabled {
       </div>
 
       <div>
-        <label for="paymentMethod">Payment method *</label>
-        <select id="paymentMethod" required>
-          <option value="ZetuPay">M-Pesa via ZetuPay</option>
-          <option value="Manual">Manual M-Pesa</option>
-        </select>
-      </div>
-
-      <div id="manualMpesaBox" class="payment-box" style="display:none">
-        <label for="mpesaCode">M-Pesa transaction code *</label>
-        <input id="mpesaCode" maxlength="15" placeholder="Enter M-Pesa transaction code">
-
-        <p style="font-size:13px;color:#52645a">
-          Enter the transaction code for the payment you have already made.
-          Your order will be held for payment verification.
-        </p>
+        <label>Payment method</label>
+        <div class="payment-box">
+          <strong>📱 Kisima M-Pesa</strong>
+          <p>
+            Complete your order and you will be redirected to the secure
+            payment process to make your payment.
+          </p>
+          <small>Payment status is checked automatically after payment.</small>
+        </div>
       </div>
 
       <div>
@@ -540,7 +538,7 @@ button:disabled {
       </div>
 
       <button id="submitOrder" type="submit" class="btn btn-green">
-        Place Order
+        Place Order & Pay
       </button>
     </form>
   </div>
@@ -553,7 +551,7 @@ button:disabled {
   <p>© <span id="year"></span> Kisima Certified Seeds</p>
 </footer>
 
-<a class="whatsapp" href="https://wa.me/254717592943" target="_blank" rel="noopener">
+<a class="whatsapp" href="https://wa.me/254715171470" target="_blank" rel="noopener">
   WhatsApp Us
 </a>
 
@@ -666,7 +664,6 @@ async function loadShopProducts() {
   }
 }
 
-/* UPDATED FARM SHOP PRODUCT DISPLAY WITH IMAGES */
 function renderShopProducts() {
   const container = document.getElementById("shopProducts");
 
@@ -903,15 +900,6 @@ function clearCart() {
   renderCart();
 }
 
-document.getElementById("paymentMethod").addEventListener("change", function() {
-  const manual = this.value === "Manual";
-
-  document.getElementById("manualMpesaBox").style.display =
-    manual ? "block" : "none";
-
-  document.getElementById("mpesaCode").required = manual;
-});
-
 function buildOrderPayload() {
   return {
     customer:document.getElementById("customer").value.trim(),
@@ -947,8 +935,8 @@ function setSubmitting(isSubmitting) {
   button.disabled = isSubmitting;
 
   button.textContent = isSubmitting
-    ? "Submitting Order..."
-    : "Place Order";
+    ? "Processing Order..."
+    : "Place Order & Pay";
 }
 
 document.getElementById("checkoutForm").addEventListener("submit", async function(event) {
@@ -960,26 +948,12 @@ document.getElementById("checkoutForm").addEventListener("submit", async functio
     return;
   }
 
-  const paymentMethod = document.getElementById("paymentMethod").value;
   const payload = buildOrderPayload();
-
-  if (paymentMethod === "Manual") {
-    payload.mpesa = document.getElementById("mpesaCode").value.trim().toUpperCase();
-
-    if (!/^[A-Z0-9]{8,15}$/.test(payload.mpesa)) {
-      showStatus("Enter a valid M-Pesa transaction code.", "error");
-      return;
-    }
-  }
 
   setSubmitting(true);
 
   try {
-    const endpoint = paymentMethod === "Manual"
-      ? "/api/shop/orders"
-      : "/api/shop/orders/zetupay";
-
-    const response = await fetch(endpoint, {
+    const response = await fetch("/api/shop/orders/zetupay", {
       method:"POST",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify(payload)
@@ -991,41 +965,18 @@ document.getElementById("checkoutForm").addEventListener("submit", async functio
       throw new Error(result.error || "Order could not be submitted.");
     }
 
-    if (paymentMethod === "ZetuPay") {
-      if (!result.checkoutUrl) {
-        throw new Error("Payment link was not returned. Please contact support.");
-      }
-
-      showStatus(
-        "Order " + result.id + " created. Redirecting to ZetuPay...",
-        "info"
-      );
-
-      sessionStorage.setItem("kisima_shop_order_id",result.id);
-
-      window.location.href = result.checkoutUrl;
-      return;
+    if (!result.checkoutUrl) {
+      throw new Error("Payment link was not returned. Please contact Kisima support.");
     }
 
     showStatus(
-      "Order successfully received! Order reference: " +
-      result.id +
-      ". Payment is pending verification. Total: " +
-      money(result.total),
-      "success"
+      "Order " + result.id + " created. Redirecting to Kisima M-Pesa...",
+      "info"
     );
 
-    cart = [];
-    renderCart();
+    sessionStorage.setItem("kisima_shop_order_id",result.id);
 
-    document.getElementById("checkoutForm").reset();
-
-    document.getElementById("manualMpesaBox").style.display = "none";
-
-    document.getElementById("checkoutStatus").scrollIntoView({
-      behavior:"smooth",
-      block:"center"
-    });
+    window.location.href = result.checkoutUrl;
 
   } catch (error) {
     showStatus(error.message || "Something went wrong. Please try again.", "error");
@@ -1036,7 +987,7 @@ document.getElementById("checkoutForm").addEventListener("submit", async functio
 
 async function checkReturnedShopPayment(orderId) {
   showStatus(
-    "Checking your ZetuPay payment for order " + orderId + "...",
+    "Checking your Kisima M-Pesa payment for order " + orderId + "...",
     "info"
   );
 
