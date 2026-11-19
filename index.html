@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#174d32">
 <title>Kisima Certified Seeds | Quality Potato Seeds</title>
+
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial,sans-serif;background:#f5f8f4;color:#183326;line-height:1.6}
@@ -37,6 +38,7 @@ th,td{padding:11px;border:1px solid #dce6dc;text-align:center}
 th{background:#174d32;color:white}
 </style>
 </head>
+
 <body>
 
 <header>
@@ -65,6 +67,7 @@ th{background:#174d32;color:white}
 
 <section class="section" id="varieties">
 <h2>Our Potato Seed Varieties</h2>
+
 <div class="products">
 <div class="product">🥔<br>Unica</div>
 <div class="product">🥔<br>Shangi</div>
@@ -80,10 +83,16 @@ th{background:#174d32;color:white}
 <section class="section" id="prices">
 <h2>Seed Prices</h2>
 <p>All prices are per 50kg bag. Same prices apply to Size 1 and Size 2.</p>
+
 <table>
 <thead>
-<tr><th>Seed Class</th><th>Size 1</th><th>Size 2</th></tr>
+<tr>
+<th>Seed Class</th>
+<th>Size 1</th>
+<th>Size 2</th>
+</tr>
 </thead>
+
 <tbody>
 <tr><td>Generation 1 (C1)</td><td>KSh 3,750</td><td>KSh 3,750</td></tr>
 <tr><td>Generation 2 (C2)</td><td>KSh 3,450</td><td>KSh 3,450</td></tr>
@@ -91,6 +100,7 @@ th{background:#174d32;color:white}
 <tr><td>Prebasic</td><td>KSh 4,750</td><td>KSh 4,750</td></tr>
 </tbody>
 </table>
+
 <p class="small">All seed bags are supplied in certified 50kg packaging.</p>
 </section>
 
@@ -153,13 +163,14 @@ th{background:#174d32;color:white}
 
 <label>Payment Method</label>
 <select id="paymentMethod" required>
-<option value="paystack">Paystack M-Pesa payment</option>
+<option value="zetupay">ZetuPay M-Pesa payment</option>
 <option value="manual">I have already paid manually</option>
 </select>
 
 <div class="payment-note" id="paymentInfo">
-<strong>Paystack M-Pesa</strong>
-<p>You will receive a payment request on your phone. Enter your M-Pesa PIN to complete payment.</p>
+<strong>ZetuPay M-Pesa</strong>
+<p>You will receive an M-Pesa payment request on your phone. Enter your M-Pesa PIN to complete payment.</p>
+<p>Your payment will be verified automatically after confirmation.</p>
 </div>
 
 <div id="manualReference" style="display:none">
@@ -175,13 +186,14 @@ Estimated Total: KSh <span id="total">Select seed class</span>
 </div>
 
 <div id="status" class="status" role="status" aria-live="polite"></div>
+
 <button type="submit" id="submitButton">PAY WITH M-PESA</button>
 </form>
 </section>
 
 <section class="section">
 <h2>M-Pesa Payment Information</h2>
-<p>Paystack M-Pesa payments are verified automatically after successful payment confirmation.</p>
+<p>ZetuPay M-Pesa payments are verified automatically after successful payment confirmation.</p>
 <p>Manual M-Pesa payments are subject to verification by our team.</p>
 <p class="small">Do not submit the same order more than once while waiting for payment confirmation.</p>
 </section>
@@ -196,9 +208,11 @@ Estimated Total: KSh <span id="total">Select seed class</span>
 <h2>Contact Kisima Certified Seeds</h2>
 <p>Call: 0715171470</p>
 <p>WhatsApp: 0717592943</p>
+
 <a class="btn" style="background:#25a65a" href="https://wa.me/254717592943">CHAT WITH US ON WHATSAPP</a>
 <a class="btn" style="background:#2469a5" href="tel:0715171470">CALL KISIMA</a>
 </section>
+
 </div>
 
 <footer>
@@ -402,13 +416,13 @@ orderForm.addEventListener('submit', async function(e) {
   showStatus(
     isManual
       ? 'Submitting your order for manual payment verification...'
-      : 'Creating your order and requesting Paystack M-Pesa payment...'
+      : 'Creating your order and requesting ZetuPay M-Pesa payment...'
   );
 
   try {
     const endpoint = isManual
       ? '/api/orders'
-      : '/api/orders/paystack';
+      : '/api/orders/zetupay';
 
     const response = await fetch(endpoint, {
       method: 'POST',
@@ -433,7 +447,7 @@ orderForm.addEventListener('submit', async function(e) {
     }
 
     showStatus(
-      `Order ${data.id} created. Total: KSh ${Number(data.total).toLocaleString('en-KE')}. ${data.message} Please check your phone and complete the M-Pesa payment.`
+      `Order ${data.id} created. Total: KSh ${Number(data.total).toLocaleString('en-KE')}. ${data.message || 'Please check your phone and complete the ZetuPay M-Pesa payment.'}`
     );
 
     await checkPayment(data.id);
