@@ -1,4 +1,4 @@
-
+ 
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -25,7 +25,7 @@ h2{color:#174d32}
 label{display:block;margin-top:13px;font-weight:bold}
 input,select,textarea{width:100%;padding:13px;margin-top:5px;border:1px solid #ccc;border-radius:7px;font-size:16px;background:white}
 button,.btn{display:block;width:100%;padding:14px;margin-top:15px;background:#174d32;color:white;border:0;border-radius:8px;font-size:17px;font-weight:bold;text-align:center;text-decoration:none;cursor:pointer}
-button:disabled{opacity:.6}
+button:disabled{opacity:.6;cursor:not-allowed}
 .total{background:#edf5eb;padding:15px;margin-top:15px;border-radius:8px;font-size:20px;font-weight:bold}
 .contact{background:#174d32;color:white;text-align:center;padding:25px;border-radius:10px}
 .contact h2{color:white}
@@ -169,7 +169,7 @@ th{background:#174d32;color:white}
 
 <div class="payment-note" id="paymentInfo">
 <strong>ZetuPay M-Pesa</strong>
-<p>You will receive an M-Pesa payment request on your phone. Enter your M-Pesa PIN to complete payment.</p>
+<p>You will be redirected to the secure ZetuPay payment page to complete your M-Pesa payment.</p>
 <p>Your payment will be verified automatically after confirmation.</p>
 </div>
 
@@ -243,6 +243,7 @@ const classPrices = {
 
 let paymentTimer = null;
 let availableProducts = [];
+let paymentAttempts = 0;
 
 function updateTotal() {
   const quantity = Number(bagsInput.value) || 0;
@@ -296,61 +297,86 @@ function resetForm() {
   loadProducts();
 }
 
+function stopPaymentCheck() {
+  if (paymentTimer) {
+    clearInterval(paymentTimer);
+    paymentTimer = null;
+  }
+}
+
+/*
+  Checks payment after the customer returns to the website.
+  It does NOT start before the customer visits ZetuPay.
+*/
 async function checkPayment(orderId) {
-  let attempts = 0;
+  stopPaymentCheck();
+  paymentAttempts = 0;
 
-  if (paymentTimer) clearInterval(paymentTimer);
+  showStatus(
+    `Checking payment status for order ${orderId}...`
+  );
 
-  paymentTimer = setInterval(async () => {
-    attempts++;
+  async function checkOnce() {
+    paymentAttempts++;
 
     try {
       const response = await fetch(
-        '/api/orders/' + encodeURIComponent(orderId) + '/payment'
+        '/api/orders/' + encodeURIComponent(orderId) + '/payment',
+        { cache: 'no-store' }
       );
 
       const state = await response.json();
 
-      if (!response.ok) throw new Error('Payment status unavailable.');
+      if (!response.ok) {
+        throw new Error(state.error || 'Payment status unavailable.');
+      }
 
       if (state.paymentStatus === 'Verified') {
-        clearInterval(paymentTimer);
-        paymentTimer = null;
+        stopPaymentCheck();
 
         showStatus(
-          `Payment confirmed! Order ${orderId} is PAID. Receipt: ${state.receipt || 'recorded'}.`
-        );
-
-        resetForm();
-        submitButton.disabled = false;
-
-      } else if (state.paymentStatus === 'Rejected') {
-        clearInterval(paymentTimer);
-        paymentTimer = null;
-
-        showStatus(
-          `Payment was not completed for order ${orderId}. Please contact Kisima.`
+          `PAYMENT CONFIRMED! Order ${orderId} is PAID. Receipt: ${state.receipt || 'recorded'}. Please keep your order reference.`
         );
 
         submitButton.disabled = false;
+        return true;
+      }
+
+      if (state.paymentStatus === 'Rejected') {
+        stopPaymentCheck();
+
+        showStatus(
+          `Payment was not completed for order ${orderId}. If you paid, contact Kisima and provide this order reference.`
+        );
+
+        submitButton.disabled = false;
+        return true;
       }
 
     } catch (error) {
       console.error('Payment check:', error.message);
     }
 
-    if (attempts >= 36 && paymentTimer) {
-      clearInterval(paymentTimer);
-      paymentTimer = null;
+    if (paymentAttempts >= 36) {
+      stopPaymentCheck();
 
       showStatus(
-        `Order ${orderId} is still awaiting payment confirmation. Please do not submit it again. Contact Kisima if you have already paid.`
+        `Order ${orderId} is still awaiting payment confirmation. If you have already paid, do not submit another order. Contact Kisima with your order reference.`
       );
 
       submitButton.disabled = false;
+      return true;
     }
 
-  }, 5000);
+    return false;
+  }
+
+  // Check immediately when the customer returns.
+  const finished = await checkOnce();
+
+  if (!finished) {
+    paymentTimer = setInterval(checkOnce, 5000);
+  }
 }
 
 seedClassEl.addEventListener('change', updateTotal);
@@ -362,8 +388,39 @@ setPaymentMode();
 updateTotal();
 loadProducts();
 
+/*
+  Payment-return handling.
+  The backend should return customers to:
+  /?payment=return&orderId=ORDER_ID
+*/
+const returnParams = new URLSearchParams(window.location.search);
+const returnedOrderId = returnParams.get('orderId');
+const returnedPayment = returnParams.get('payment');
+
+if (returnedOrderId && returnedPayment === 'return') {
+  showStatus(
+    `You have returned from payment checkout. Checking your payment for order ${returnedOrderId}...`
+  );
+
+  submitButton.disabled = true;
+
+  // Scroll the customer to the order status.
+  document.getElementById('order').scrollIntoView({behavior:'smooth'});
+
+  checkPayment(returnedOrderId);
+
+  // Clean the URL after reading the payment-return parameters.
+  window.history.replaceState(
+    {},
+    document.title,
+    window.location.pathname
+  );
+}
+
 orderForm.addEventListener('submit', async function(e) {
   e.preventDefault();
+
+  if (submitButton.disabled) return;
 
   const payload = {
     customer: document.getElementById('name').value.trim(),
@@ -416,7 +473,7 @@ orderForm.addEventListener('submit', async function(e) {
   showStatus(
     isManual
       ? 'Submitting your order for manual payment verification...'
-      : 'Creating your order and requesting ZetuPay M-Pesa payment...'
+      : 'Creating your order and preparing secure ZetuPay checkout...'
   );
 
   try {
@@ -446,14 +503,22 @@ orderForm.addEventListener('submit', async function(e) {
       return;
     }
 
+    if (!data.checkoutUrl) {
+      throw new Error('ZetuPay checkout link was not received.');
+    }
+
     showStatus(
-      `Order ${data.id} created. Total: KSh ${Number(data.total).toLocaleString('en-KE')}. ${data.message || 'Please check your phone and complete the ZetuPay M-Pesa payment.'}`
+      `Order ${data.id} created. Total: KSh ${Number(data.total).toLocaleString('en-KE')}. Redirecting to secure ZetuPay checkout...`
     );
 
-    await checkPayment(data.id);
+    /*
+      Redirect to ZetuPay.
+      Payment verification will happen after the customer returns.
+    */
+    window.location.href = data.checkoutUrl;
 
   } catch (error) {
-    showStatus(error.message);
+    showStatus(error.message || 'Something went wrong. Please try again.');
     submitButton.disabled = false;
   }
 });
