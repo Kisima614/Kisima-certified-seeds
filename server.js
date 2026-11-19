@@ -51,7 +51,10 @@ const pool = new Pool({
     : { rejectUnauthorized: false }
 });
 
-// Prices are per 50kg bag.
+// ================================
+// POTATO SEED PRICES
+// ================================
+
 const CLASS_PRICES = {
   C1: 3750,
   C2: 3450,
@@ -68,6 +71,48 @@ const seed = [
   ['Sheherekea', 3750, true],
   ['Stephen', 3750, true],
   ['Markies', 3750, true]
+];
+
+// ================================
+// FERTILIZERS & CHEMICALS
+// ================================
+
+const SHOP_PRODUCTS = [
+  {
+    id: 'OCP',
+    name: 'OCP',
+    category: 'Fertilizer',
+    unit: 'Bag',
+    price: 2000
+  },
+  {
+    id: 'DAP',
+    name: 'DAP',
+    category: 'Fertilizer',
+    unit: 'Bag',
+    price: 4850
+  },
+  {
+    id: 'NPK',
+    name: 'NPK',
+    category: 'Fertilizer',
+    unit: 'Bag',
+    price: 2000
+  },
+  {
+    id: 'SUPERGRO',
+    name: 'Supergro',
+    category: 'Chemical',
+    unit: '1 Litre',
+    price: 2700
+  },
+  {
+    id: 'MISTRESS',
+    name: 'Mistress',
+    category: 'Chemical',
+    unit: '1 kg',
+    price: 800
+  }
 ];
 
 // ================================
@@ -108,12 +153,51 @@ async function init() {
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS mpesa_receipt TEXT;
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS potato_size TEXT NOT NULL DEFAULT 'Size 1';
 
-    -- ZetuPay payment columns.
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS zetupay_payment_key TEXT;
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS zetupay_transaction_id TEXT;
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS zetupay_reference TEXT;
+
+    -- Separate shop product catalog.
+    CREATE TABLE IF NOT EXISTS shop_products (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      category TEXT NOT NULL,
+      unit TEXT NOT NULL,
+      price INTEGER NOT NULL CHECK(price >= 0),
+      available BOOLEAN NOT NULL DEFAULT true,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    -- Shop orders do not overwrite existing seed orders.
+    CREATE TABLE IF NOT EXISTS shop_orders (
+      id TEXT PRIMARY KEY,
+      customer TEXT NOT NULL,
+      phone TEXT NOT NULL,
+      email TEXT NOT NULL DEFAULT '',
+      location TEXT NOT NULL,
+      delivery TEXT NOT NULL,
+      notes TEXT DEFAULT '',
+      items JSONB NOT NULL DEFAULT '[]',
+      total INTEGER NOT NULL,
+      mpesa_ref TEXT DEFAULT '',
+      payment_status TEXT NOT NULL DEFAULT 'Pending verification',
+      delivery_status TEXT NOT NULL DEFAULT 'Order received',
+      payment_phone TEXT,
+      zetupay_payment_key TEXT,
+      zetupay_reference TEXT,
+      zetupay_transaction_id TEXT,
+      mpesa_receipt TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE INDEX IF NOT EXISTS shop_orders_phone_idx
+    ON shop_orders(phone);
+
+    CREATE INDEX IF NOT EXISTS orders_phone_idx
+    ON orders(phone);
   `);
 
+  // Initialize potato varieties.
   for (const [name, price, available] of seed) {
     await pool.query(
       `INSERT INTO products(name, price, available)
@@ -121,6 +205,28 @@ async function init() {
        ON CONFLICT(name) DO UPDATE
        SET available = EXCLUDED.available`,
       [name, price, available]
+    );
+  }
+
+  // Initialize farm shop products.
+  for (const product of SHOP_PRODUCTS) {
+    await pool.query(
+      `INSERT INTO shop_products
+       (id, name, category, unit, price, available)
+       VALUES($1,$2,$3,$4,$5,true)
+       ON CONFLICT(id) DO UPDATE
+       SET name = EXCLUDED.name,
+           category = EXCLUDED.category,
+           unit = EXCLUDED.unit,
+           price = EXCLUDED.price,
+           updated_at = NOW()`,
+      [
+        product.id,
+        product.name,
+        product.category,
+        product.unit,
+        product.price
+      ]
     );
   }
 
@@ -239,13 +345,6 @@ async function zetuPayRequest(endpoint, options = {}) {
   return data.data || data;
 }
 
-/*
-  Fetch the payment directly from ZetuPay.
-
-  This function does not assume that every non-success response
-  means a network error. It returns the actual payment status
-  when ZetuPay provides one.
-*/
 async function getZetuPayPayment(paymentKey) {
   if (!paymentKey) {
     return null;
@@ -271,12 +370,6 @@ async function getZetuPayPayment(paymentKey) {
   return data.data || data;
 }
 
-/*
-  Successful payments must match:
-  - payment status
-  - expected amount
-  - KES currency
-*/
 async function verifyZetuPayPayment(paymentKey, expectedTotal) {
   const payment = await getZetuPayPayment(paymentKey);
 
@@ -295,9 +388,10 @@ async function verifyZetuPayPayment(paymentKey, expectedTotal) {
   return payment;
 }
 
-/*
-  Mark an order paid only after server-side verification.
-*/
+// ================================
+// VERIFY EXISTING SEED ZETUPAY
+// ================================
+
 async function markZetuPayOrderPaid(paymentKey, paymentData) {
   const result = await pool.query(
     `SELECT id, total, payment_status
@@ -307,7 +401,7 @@ async function markZetuPayOrderPaid(paymentKey, paymentData) {
   );
 
   if (!result.rowCount) {
-    console.warn('Unknown ZetuPay payment key.');
+    console.warn('Unknown seed ZetuPay payment key.');
     return;
   }
 
@@ -323,7 +417,7 @@ async function markZetuPayOrderPaid(paymentKey, paymentData) {
   );
 
   if (!verified) {
-    console.error('ZetuPay payment verification failed.');
+    console.error('Seed ZetuPay payment verification failed.');
     return;
   }
 
@@ -360,15 +454,9 @@ async function markZetuPayOrderPaid(paymentKey, paymentData) {
     ]
   );
 
-  console.log('ZetuPay payment verified for order:', order.id);
+  console.log('Seed ZetuPay payment verified:', order.id);
 }
 
-/*
-  Update failed/cancelled/expired payments.
-
-  A payment is never marked rejected simply because the
-  verification request failed or timed out.
-*/
 async function updateZetuPayFailedStatus(orderId, payment) {
   const status = String(payment?.status || '').toLowerCase();
 
@@ -385,6 +473,93 @@ async function updateZetuPayFailedStatus(orderId, payment) {
 
   await pool.query(
     `UPDATE orders
+     SET payment_status = 'Rejected'
+     WHERE id = $1
+       AND payment_status <> 'Verified'`,
+    [orderId]
+  );
+
+  return true;
+}
+
+// ================================
+// VERIFY FARM SHOP ZETUPAY
+// ================================
+
+async function markShopOrderPaid(paymentKey, paymentData) {
+  const result = await pool.query(
+    `SELECT id, total, payment_status
+     FROM shop_orders
+     WHERE zetupay_payment_key = $1`,
+    [paymentKey]
+  );
+
+  if (!result.rowCount) {
+    console.warn('Unknown shop ZetuPay payment key.');
+    return;
+  }
+
+  const order = result.rows[0];
+
+  if (order.payment_status === 'Verified') {
+    return;
+  }
+
+  const verified = await verifyZetuPayPayment(
+    paymentKey,
+    order.total
+  );
+
+  if (!verified) {
+    console.error('Shop ZetuPay payment verification failed.');
+    return;
+  }
+
+  const receipt = clean(
+    paymentData?.receiptNumber ||
+    paymentData?.receipt ||
+    verified?.receiptNumber ||
+    verified?.waveTransactionId ||
+    paymentKey,
+    100
+  );
+
+  const transactionId = clean(
+    paymentData?.waveTransactionId ||
+    verified?.waveTransactionId ||
+    '',
+    100
+  );
+
+  await pool.query(
+    `UPDATE shop_orders
+     SET payment_status = 'Verified',
+         mpesa_ref = $2,
+         mpesa_receipt = $2,
+         zetupay_transaction_id = $3
+     WHERE id = $1
+       AND zetupay_payment_key = $4
+       AND payment_status <> 'Verified'`,
+    [
+      order.id,
+      receipt,
+      transactionId,
+      paymentKey
+    ]
+  );
+
+  console.log('Farm shop ZetuPay payment verified:', order.id);
+}
+
+async function updateShopZetuPayFailedStatus(orderId, payment) {
+  const status = String(payment?.status || '').toLowerCase();
+
+  if (!['failed', 'cancelled', 'canceled', 'expired'].includes(status)) {
+    return false;
+  }
+
+  await pool.query(
+    `UPDATE shop_orders
      SET payment_status = 'Rejected'
      WHERE id = $1
        AND payment_status <> 'Verified'`,
@@ -414,7 +589,7 @@ app.get('/api/health', async (_req, res) => {
 });
 
 // ================================
-// PRODUCTS
+// SEED PRODUCTS
 // ================================
 
 app.get('/api/products', async (_req, res) => {
@@ -432,7 +607,29 @@ app.get('/api/products', async (_req, res) => {
 });
 
 // ================================
-// ORDER VALIDATION
+// FARM SHOP PRODUCT CATALOG
+// ================================
+
+app.get('/api/shop/products', async (_req, res) => {
+  try {
+    const r = await pool.query(
+      `SELECT id, name, category, unit, price, available
+       FROM shop_products
+       ORDER BY category, name`
+    );
+
+    res.json(r.rows);
+  } catch (e) {
+    console.error('SHOP PRODUCTS ERROR:', e.message);
+
+    res.status(500).json({
+      error: 'Could not load farm shop products.'
+    });
+  }
+});
+
+// ================================
+// SEED ORDER VALIDATION
 // ================================
 
 async function getOrderDetails(b) {
@@ -503,7 +700,151 @@ async function getOrderDetails(b) {
 }
 
 // ================================
-// MANUAL M-PESA ORDERS
+// FARM SHOP ORDER VALIDATION
+// ================================
+
+async function getShopOrderDetails(b) {
+  const customer = clean(b.customer, 100);
+  const phone = clean(b.phone, 40);
+  const email = clean(b.email, 200).toLowerCase();
+  const location = clean(b.location, 220);
+  const delivery = clean(b.delivery, 100);
+  const notes = clean(b.notes, 500);
+
+  if (
+    !customer ||
+    !phone ||
+    !location ||
+    !delivery ||
+    (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+  ) {
+    throw new Error('Please complete the required customer information.');
+  }
+
+  if (!['Delivery', 'Collection'].includes(delivery)) {
+    throw new Error('Please select Delivery or Collection.');
+  }
+
+  if (!Array.isArray(b.items) || b.items.length < 1 || b.items.length > 50) {
+    throw new Error('Your cart must contain at least one item.');
+  }
+
+  const items = [];
+  let total = 0;
+
+  for (const item of b.items) {
+    const quantity = Number(item.quantity);
+
+    if (
+      !Number.isInteger(quantity) ||
+      quantity < 1 ||
+      quantity > 500
+    ) {
+      throw new Error('Invalid product quantity.');
+    }
+
+    // Potato seed item.
+    if (item.type === 'seed') {
+      const variety = clean(item.variety, 100);
+      const seedClass = clean(item.seedClass, 50);
+      const potatoSize = clean(item.potatoSize, 20);
+
+      if (!variety || !CLASS_PRICES[seedClass]) {
+        throw new Error('Invalid potato seed item.');
+      }
+
+      if (!['Size 1', 'Size 2'].includes(potatoSize)) {
+        throw new Error('Invalid potato size.');
+      }
+
+      const seedProduct = await pool.query(
+        `SELECT name, available
+         FROM products
+         WHERE name = $1`,
+        [variety]
+      );
+
+      if (!seedProduct.rowCount || !seedProduct.rows[0].available) {
+        throw new Error(`${variety} is currently unavailable.`);
+      }
+
+      const unitPrice = CLASS_PRICES[seedClass];
+      const lineTotal = unitPrice * quantity;
+
+      items.push({
+        type: 'seed',
+        id: variety,
+        name: variety,
+        category: 'Certified Potato Seeds',
+        unit: '50kg Bag',
+        seedClass,
+        potatoSize,
+        quantity,
+        unitPrice,
+        lineTotal
+      });
+
+      total += lineTotal;
+      continue;
+    }
+
+    // Fertilizer and chemical item.
+    if (item.type === 'product') {
+      const productId = clean(item.productId, 50);
+
+      const productResult = await pool.query(
+        `SELECT id, name, category, unit, price, available
+         FROM shop_products
+         WHERE id = $1`,
+        [productId]
+      );
+
+      if (
+        !productResult.rowCount ||
+        !productResult.rows[0].available
+      ) {
+        throw new Error('One of the farm shop products is unavailable.');
+      }
+
+      const product = productResult.rows[0];
+      const lineTotal = Number(product.price) * quantity;
+
+      items.push({
+        type: 'product',
+        id: product.id,
+        name: product.name,
+        category: product.category,
+        unit: product.unit,
+        quantity,
+        unitPrice: Number(product.price),
+        lineTotal
+      });
+
+      total += lineTotal;
+      continue;
+    }
+
+    throw new Error('Invalid item type in your cart.');
+  }
+
+  if (!Number.isSafeInteger(total) || total < 1 || total > 1000000) {
+    throw new Error('Invalid order total.');
+  }
+
+  return {
+    customer,
+    phone,
+    email,
+    location,
+    delivery,
+    notes,
+    items,
+    total
+  };
+}
+
+// ================================
+// MANUAL M-PESA SEED ORDERS
 // ================================
 
 app.post('/api/orders', async (req, res) => {
@@ -562,7 +903,7 @@ app.post('/api/orders', async (req, res) => {
 });
 
 // ================================
-// ZETUPAY HOSTED CHECKOUT
+// SEED ZETUPAY CHECKOUT
 // ================================
 
 app.post('/api/orders/zetupay', async (req, res) => {
@@ -586,17 +927,11 @@ app.post('/api/orders/zetupay', async (req, res) => {
 
     orderId = makeOrderId();
     const reference = makeZetuPayReference();
-
     const appUrl = getAppUrl();
 
-    /*
-      This return URL matches the HTML payment-return handler.
-      Customer returns to the home page with order ID.
-    */
     const redirectUrl =
       `${appUrl}/?payment=return&orderId=${encodeURIComponent(orderId)}`;
 
-    // Save the order before starting payment.
     await pool.query(
       `INSERT INTO orders
        (id, customer, phone, email, location, seed_class,
@@ -626,7 +961,6 @@ app.post('/api/orders/zetupay', async (req, res) => {
       ]
     );
 
-    // Initiate hosted checkout.
     const payment = await zetuPayRequest('/payment/initiate', {
       method: 'POST',
       body: JSON.stringify({
@@ -643,7 +977,6 @@ app.post('/api/orders/zetupay', async (req, res) => {
       throw new Error('ZetuPay did not return a checkout link.');
     }
 
-    // Store payment key for secure server-side verification.
     await pool.query(
       `UPDATE orders
        SET zetupay_payment_key = $2
@@ -672,7 +1005,156 @@ app.post('/api/orders/zetupay', async (req, res) => {
 });
 
 // ================================
-// PAYMENT STATUS CHECK
+// FARM SHOP MANUAL M-PESA ORDER
+// ================================
+
+app.post('/api/shop/orders', async (req, res) => {
+  const mpesa = clean(req.body?.mpesa, 40).toUpperCase();
+
+  if (!/^[A-Z0-9]{8,15}$/.test(mpesa)) {
+    return res.status(400).json({
+      error: 'Check the M-Pesa transaction reference format.'
+    });
+  }
+
+  try {
+    const o = await getShopOrderDetails(req.body || {});
+    const id = makeOrderId();
+
+    await pool.query(
+      `INSERT INTO shop_orders
+       (id, customer, phone, email, location, delivery,
+        notes, items, total, mpesa_ref)
+       VALUES($1,$2,$3,$4,$5,$6,$7,$8::jsonb,$9,$10)`,
+      [
+        id,
+        o.customer,
+        o.phone,
+        o.email,
+        o.location,
+        o.delivery,
+        o.notes,
+        JSON.stringify(o.items),
+        o.total,
+        mpesa
+      ]
+    );
+
+    return res.status(201).json({
+      id,
+      items: o.items,
+      total: o.total,
+      paymentStatus: 'Pending verification',
+      message: 'Farm shop order received. Payment is pending verification.'
+    });
+
+  } catch (e) {
+    console.error('SHOP ORDER SAVE ERROR:', e.message);
+
+    return res.status(400).json({
+      error: e.message
+    });
+  }
+});
+
+// ================================
+// FARM SHOP ZETUPAY CHECKOUT
+// ================================
+
+app.post('/api/shop/orders/zetupay', async (req, res) => {
+  let orderId = null;
+
+  try {
+    const o = await getShopOrderDetails(req.body || {});
+    const phone = normalizeKenyanPhone(o.phone);
+
+    if (!phone) {
+      return res.status(400).json({
+        error: 'Enter a valid Kenyan M-Pesa phone number.'
+      });
+    }
+
+    if (o.total < 1 || o.total > 1000000) {
+      return res.status(400).json({
+        error: 'Payment must be between KSh 1 and KSh 1,000,000.'
+      });
+    }
+
+    orderId = makeOrderId();
+    const reference = makeZetuPayReference();
+    const appUrl = getAppUrl();
+
+    const redirectUrl =
+      `${appUrl}/?shopPayment=return&orderId=${encodeURIComponent(orderId)}`;
+
+    // Save order first.
+    await pool.query(
+      `INSERT INTO shop_orders
+       (id, customer, phone, email, location, delivery,
+        notes, items, total, payment_status,
+        payment_phone, zetupay_reference)
+       VALUES($1,$2,$3,$4,$5,$6,$7,$8::jsonb,$9,
+              'Pending verification',$10,$11)`,
+      [
+        orderId,
+        o.customer,
+        o.phone,
+        o.email,
+        o.location,
+        o.delivery,
+        o.notes,
+        JSON.stringify(o.items),
+        o.total,
+        phone,
+        reference
+      ]
+    );
+
+    const payment = await zetuPayRequest('/payment/initiate', {
+      method: 'POST',
+      body: JSON.stringify({
+        amount: o.total,
+        phoneNumber: phone,
+        reference,
+        redirectUrl,
+        currency: 'KES',
+        identifier: orderId
+      })
+    });
+
+    if (!payment.checkoutUrl || !payment.paymentKey) {
+      throw new Error('ZetuPay did not return a checkout link.');
+    }
+
+    await pool.query(
+      `UPDATE shop_orders
+       SET zetupay_payment_key = $2
+       WHERE id = $1`,
+      [orderId, payment.paymentKey]
+    );
+
+    return res.status(201).json({
+      id: orderId,
+      reference,
+      paymentKey: payment.paymentKey,
+      checkoutUrl: payment.checkoutUrl,
+      items: o.items,
+      total: o.total,
+      paymentStatus: 'Pending verification',
+      message: 'Farm shop order created. Continue to ZetuPay.'
+    });
+
+  } catch (e) {
+    console.error('SHOP ZETUPAY ERROR:', e.message);
+
+    return res.status(502).json({
+      error: e.message || 'ZetuPay could not start payment.'
+    });
+  }
+});
+
+// ================================
+// SEED PAYMENT STATUS CHECK
 // ================================
 
 app.get('/api/orders/:id/payment', async (req, res) => {
@@ -695,7 +1177,6 @@ app.get('/api/orders/:id/payment', async (req, res) => {
 
     const order = r.rows[0];
 
-    // Already verified: do not need to query provider again.
     if (order.paymentStatus === 'Verified') {
       return res.json({
         id: order.id,
@@ -709,7 +1190,6 @@ app.get('/api/orders/:id/payment', async (req, res) => {
         const payment = await getZetuPayPayment(order.paymentKey);
 
         if (payment) {
-          // Confirm successful payment against expected amount/currency.
           const verified = await verifyZetuPayPayment(
             order.paymentKey,
             order.total
@@ -735,7 +1215,6 @@ app.get('/api/orders/:id/payment', async (req, res) => {
             });
           }
 
-          // Mark a genuinely failed/cancelled/expired provider payment.
           await updateZetuPayFailedStatus(order.id, payment);
 
           if (
@@ -750,11 +1229,10 @@ app.get('/api/orders/:id/payment', async (req, res) => {
           }
         }
       } catch (e) {
-        console.error('ZetuPay status check error:', e.message);
+        console.error('Seed payment status error:', e.message);
       }
     }
 
-    // Pending remains pending if provider verification is unavailable.
     const latest = await pool.query(
       `SELECT payment_status AS "paymentStatus",
               mpesa_receipt AS receipt
@@ -769,7 +1247,7 @@ app.get('/api/orders/:id/payment', async (req, res) => {
     });
 
   } catch (e) {
-    console.error('Payment status endpoint error:', e.message);
+    console.error('SEED PAYMENT STATUS ERROR:', e.message);
 
     return res.status(500).json({
       error: 'Could not check payment status.'
@@ -778,7 +1256,109 @@ app.get('/api/orders/:id/payment', async (req, res) => {
 });
 
 // ================================
-// CUSTOMER ORDER LOOKUP
+// FARM SHOP PAYMENT STATUS
+// ================================
+
+app.get('/api/shop/orders/:id/payment', async (req, res) => {
+  try {
+    const r = await pool.query(
+      `SELECT id, total,
+              payment_status AS "paymentStatus",
+              mpesa_receipt AS receipt,
+              zetupay_payment_key AS "paymentKey"
+       FROM shop_orders
+       WHERE id = $1`,
+      [clean(req.params.id, 40)]
+    );
+
+    if (!r.rowCount) {
+      return res.status(404).json({
+        error: 'Shop order not found.'
+      });
+    }
+
+    const order = r.rows[0];
+
+    if (order.paymentStatus === 'Verified') {
+      return res.json({
+        id: order.id,
+        paymentStatus: 'Verified',
+        receipt: order.receipt
+      });
+    }
+
+    if (order.paymentKey) {
+      try {
+        const payment = await getZetuPayPayment(order.paymentKey);
+
+        if (payment) {
+          const verified = await verifyZetuPayPayment(
+            order.paymentKey,
+            order.total
+          );
+
+          if (verified) {
+            await markShopOrderPaid(
+              order.paymentKey,
+              verified
+            );
+
+            const updated = await pool.query(
+              `SELECT payment_status AS "paymentStatus",
+                      mpesa_receipt AS receipt
+               FROM shop_orders
+               WHERE id = $1`,
+              [order.id]
+            );
+
+            return res.json({
+              id: order.id,
+              ...updated.rows[0]
+            });
+          }
+
+          await updateShopZetuPayFailedStatus(order.id, payment);
+
+          if (
+            ['failed', 'cancelled', 'canceled', 'expired']
+              .includes(String(payment.status || '').toLowerCase())
+          ) {
+            return res.json({
+              id: order.id,
+              paymentStatus: 'Rejected',
+              receipt: null
+            });
+          }
+        }
+      } catch (e) {
+        console.error('Shop payment status error:', e.message);
+      }
+    }
+
+    const latest = await pool.query(
+      `SELECT payment_status AS "paymentStatus",
+              mpesa_receipt AS receipt
+       FROM shop_orders
+       WHERE id = $1`,
+      [order.id]
+    );
+
+    return res.json({
+      id: order.id,
+      ...latest.rows[0]
+    });
+
+  } catch (e) {
+    console.error('SHOP PAYMENT STATUS ERROR:', e.message);
+
+    return res.status(500).json({
+      error: 'Could not check farm shop payment status.'
+    });
+  }
+});
+
+// ================================
+// CUSTOMER SEED ORDER LOOKUP
 // ================================
 
 app.post('/api/orders/lookup', async (req, res) => {
@@ -819,6 +1399,44 @@ app.post('/api/orders/lookup', async (req, res) => {
 });
 
 // ================================
+// CUSTOMER FARM SHOP LOOKUP
+// ================================
+
+app.post('/api/shop/orders/lookup', async (req, res) => {
+  const phone = clean(req.body?.phone, 40).replace(/\s/g, '');
+
+  if (phone.length < 7) {
+    return res.status(400).json({
+      error: 'Enter the phone number used for the order.'
+    });
+  }
+
+  try {
+    const r = await pool.query(
+      `SELECT id, customer, location, delivery,
+              items, total,
+              payment_status AS "paymentStatus",
+              delivery_status AS "deliveryStatus",
+              created_at AS created
+       FROM shop_orders
+       WHERE regexp_replace(phone, '\\s', '', 'g') = $1
+       ORDER BY created_at DESC
+       LIMIT 30`,
+      [phone]
+    );
+
+    return res.json(r.rows);
+
+  } catch (e) {
+    console.error('SHOP ORDER LOOKUP ERROR:', e.message);
+
+    return res.status(500).json({
+      error: 'Could not look up farm shop orders.'
+    });
+  }
+});
+
+// ================================
 // ADMIN LOGIN
 // ================================
 
@@ -847,7 +1465,7 @@ app.post('/api/admin/login', async (req, res) => {
 });
 
 // ================================
-// ADMIN ORDER LIST
+// ADMIN SEED ORDER LIST
 // ================================
 
 app.get('/api/admin/orders', auth, async (_req, res) => {
@@ -883,7 +1501,39 @@ app.get('/api/admin/orders', auth, async (_req, res) => {
 });
 
 // ================================
-// ADMIN UPDATE ORDER STATUS
+// ADMIN FARM SHOP ORDERS
+// ================================
+
+app.get('/api/admin/shop-orders', auth, async (_req, res) => {
+  try {
+    const r = await pool.query(
+      `SELECT id, customer, phone, email, location,
+              delivery, notes, items, total,
+              mpesa_ref AS "mpesaRef",
+              mpesa_receipt AS "mpesaReceipt",
+              zetupay_reference AS "zetupayReference",
+              zetupay_transaction_id AS "zetupayTransactionId",
+              payment_status AS "paymentStatus",
+              delivery_status AS "deliveryStatus",
+              created_at AS created
+       FROM shop_orders
+       ORDER BY created_at DESC
+       LIMIT 500`
+    );
+
+    return res.json(r.rows);
+
+  } catch (e) {
+    console.error('ADMIN SHOP ORDER LIST ERROR:', e.message);
+
+    return res.status(500).json({
+      error: 'Could not load farm shop orders.'
+    });
+  }
+});
+
+// ================================
+// ADMIN UPDATE SEED ORDER STATUS
 // ================================
 
 app.patch('/api/admin/orders/:id', auth, async (req, res) => {
@@ -938,7 +1588,62 @@ app.patch('/api/admin/orders/:id', auth, async (req, res) => {
 });
 
 // ================================
-// ADMIN PRODUCT UPDATE
+// ADMIN UPDATE FARM SHOP ORDER
+// ================================
+
+app.patch('/api/admin/shop-orders/:id', auth, async (req, res) => {
+  const pay = [
+    'Pending verification',
+    'Verified',
+    'Rejected'
+  ].includes(req.body?.paymentStatus)
+    ? req.body.paymentStatus
+    : null;
+
+  const del = [
+    'Order received',
+    'Preparing',
+    'Dispatched',
+    'Delivered'
+  ].includes(req.body?.deliveryStatus)
+    ? req.body.deliveryStatus
+    : null;
+
+  if (!pay && !del) {
+    return res.status(400).json({
+      error: 'No valid status supplied.'
+    });
+  }
+
+  try {
+    const r = await pool.query(
+      `UPDATE shop_orders
+       SET payment_status = COALESCE($2, payment_status),
+           delivery_status = COALESCE($3, delivery_status)
+       WHERE id = $1
+       RETURNING id`,
+      [req.params.id, pay, del]
+    );
+
+    if (!r.rowCount) {
+      return res.status(404).json({
+        error: 'Shop order not found.'
+      });
+    }
+
+    return res.json({ ok: true });
+
+  } catch (e) {
+    console.error('ADMIN SHOP ORDER UPDATE ERROR:', e.message);
+
+    return res.status(500).json({
+      error: 'Could not update farm shop order.'
+    });
+  }
+});
+
+// ================================
+// ADMIN UPDATE SEED PRODUCT
 // ================================
 
 app.patch('/api/admin/products/:id', auth, async (req, res) => {
@@ -985,6 +1690,53 @@ app.patch('/api/admin/products/:id', auth, async (req, res) => {
 });
 
 // ================================
+// ADMIN UPDATE FARM SHOP PRODUCT
+// ================================
+
+app.patch('/api/admin/shop-products/:id', auth, async (req, res) => {
+  const price = Number(req.body?.price);
+  const available = req.body?.available;
+
+  if (
+    !Number.isInteger(price) ||
+    price < 0 ||
+    price > 10000000 ||
+    typeof available !== 'boolean'
+  ) {
+    return res.status(400).json({
+      error: 'Invalid price or availability.'
+    });
+  }
+
+  try {
+    const r = await pool.query(
+      `UPDATE shop_products
+       SET price = $2,
+           available = $3,
+           updated_at = NOW()
+       WHERE id = $1
+       RETURNING id, name, category, unit, price, available`,
+      [req.params.id, price, available]
+    );
+
+    if (!r.rowCount) {
+      return res.status(404).json({
+        error: 'Shop product not found.'
+      });
+    }
+
+    return res.json(r.rows[0]);
+
+  } catch (e) {
+    console.error('ADMIN SHOP PRODUCT UPDATE ERROR:', e.message);
+
+    return res.status(500).json({
+      error: 'Could not update shop product.'
+    });
+  }
+});
+
+// ================================
 // WEBSITE HOME PAGE
 // ================================
 
@@ -999,7 +1751,7 @@ app.get('/', (_req, res) => {
 init()
   .then(() => {
     app.listen(process.env.PORT || 3000, '0.0.0.0', () => {
-      console.log('Kisima app running with ZetuPay payments');
+      console.log('Kisima app running with ZetuPay and Farm Shop');
     });
   })
   .catch(e => {
