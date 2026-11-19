@@ -1,4 +1,3 @@
-
 const express = require('express');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
@@ -51,9 +50,9 @@ const pool = new Pool({
     : { rejectUnauthorized: false }
 });
 
-// ================================
+// =================================
 // POTATO SEED PRICES
-// ================================
+// =================================
 
 const CLASS_PRICES = {
   C1: 3750,
@@ -73,9 +72,9 @@ const seed = [
   ['Markies', 3750, true]
 ];
 
-// ================================
+// =================================
 // FERTILIZERS & CHEMICALS
-// ================================
+// =================================
 
 const SHOP_PRODUCTS = [
   {
@@ -120,9 +119,9 @@ const SHOP_PRODUCTS = [
   }
 ];
 
-// ================================
+// =================================
 // DATABASE INITIALIZATION
-// ================================
+// =================================
 
 async function init() {
   await pool.query(`
@@ -163,7 +162,7 @@ async function init() {
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS zetupay_reference TEXT;
 
     CREATE TABLE IF NOT EXISTS shop_products (
-      id TEXT PRIMARY PRIMARY KEY,
+      id TEXT PRIMARY KEY,
       name TEXT NOT NULL,
       category TEXT NOT NULL,
       unit TEXT NOT NULL,
@@ -242,9 +241,9 @@ async function init() {
 
 const adminHash = bcrypt.hashSync(process.env.ADMIN_PASSWORD, 12);
 
-// ================================
+// =================================
 // AUTHENTICATION
-// ================================
+// =================================
 
 function auth(req, res, next) {
   const token = (req.headers.authorization || '')
@@ -266,9 +265,9 @@ function auth(req, res, next) {
   }
 }
 
-// ================================
+// =================================
 // HELPERS
-// ================================
+// =================================
 
 const clean = (v, max = 200) =>
   String(v ?? '').trim().slice(0, max);
@@ -319,9 +318,9 @@ function getAppUrl() {
   ).replace(/\/+$/, '');
 }
 
-// ================================
+// =================================
 // ZETUPAY API
-// ================================
+// =================================
 
 async function zetuPayRequest(endpoint, options = {}) {
   const response = await fetch(
@@ -395,9 +394,9 @@ async function verifyZetuPayPayment(paymentKey, expectedTotal) {
   return payment;
 }
 
-// ================================
+// =================================
 // VERIFY EXISTING SEED ZETUPAY
-// ================================
+// =================================
 
 async function markZetuPayOrderPaid(paymentKey, paymentData) {
   const result = await pool.query(
@@ -489,9 +488,9 @@ async function updateZetuPayFailedStatus(orderId, payment) {
   return true;
 }
 
-// ================================
+// =================================
 // VERIFY FARM SHOP ZETUPAY
-// ================================
+// =================================
 
 async function markShopOrderPaid(paymentKey, paymentData) {
   const result = await pool.query(
@@ -576,11 +575,10 @@ async function updateShopZetuPayFailedStatus(orderId, payment) {
   return true;
 }
 
-// ================================
+// =================================
 // PRODUCT IMAGE SERVING
-// ================================
+// =================================
 
-// Actual image filenames in the repository root.
 const productImageFiles = {
   OCP: 'images (1) (1).jpeg',
   DAP: 'images (30).jpeg',
@@ -603,15 +601,15 @@ app.get('/product-images/:product', (req, res) => {
   });
 });
 
-// ================================
+// =================================
 // STATIC WEBSITE
-// ================================
+// =================================
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ================================
+// =================================
 // HEALTH CHECK
-// ================================
+// =================================
 
 app.get('/api/health', async (_req, res) => {
   try {
@@ -622,9 +620,9 @@ app.get('/api/health', async (_req, res) => {
   }
 });
 
-// ================================
+// =================================
 // SEED PRODUCTS
-// ================================
+// =================================
 
 app.get('/api/products', async (_req, res) => {
   try {
@@ -640,9 +638,9 @@ app.get('/api/products', async (_req, res) => {
   }
 });
 
-// ================================
+// =================================
 // FARM SHOP PRODUCT CATALOG
-// ================================
+// =================================
 
 app.get('/api/shop/products', async (_req, res) => {
   try {
@@ -662,9 +660,9 @@ app.get('/api/shop/products', async (_req, res) => {
   }
 });
 
-// ================================
+// =================================
 // SEED ORDER VALIDATION
-// ================================
+// =================================
 
 async function getOrderDetails(b) {
   const customer = clean(b.customer, 100);
@@ -733,9 +731,9 @@ async function getOrderDetails(b) {
   };
 }
 
-// ================================
+// =================================
 // FARM SHOP ORDER VALIDATION
-// ================================
+// =================================
 
 async function getShopOrderDetails(b) {
   const customer = clean(b.customer, 100);
@@ -875,9 +873,9 @@ async function getShopOrderDetails(b) {
   };
 }
 
-// ================================
+// =================================
 // MANUAL M-PESA SEED ORDERS
-// ================================
+// =================================
 
 app.post('/api/orders', async (req, res) => {
   const mpesa = clean(req.body?.mpesa, 40).toUpperCase();
@@ -934,9 +932,9 @@ app.post('/api/orders', async (req, res) => {
   }
 });
 
-// ================================
+// =================================
 // SEED ZETUPAY CHECKOUT
-// ================================
+// =================================
 
 app.post('/api/orders/zetupay', async (req, res) => {
   let orderId = null;
@@ -1036,9 +1034,9 @@ app.post('/api/orders/zetupay', async (req, res) => {
   }
 });
 
-// ================================
+// =================================
 // FARM SHOP MANUAL M-PESA ORDER
-// ================================
+// =================================
 
 app.post('/api/shop/orders', async (req, res) => {
   const mpesa = clean(req.body?.mpesa, 40).toUpperCase();
@@ -1089,9 +1087,9 @@ app.post('/api/shop/orders', async (req, res) => {
   }
 });
 
-// ================================
+// =================================
 // FARM SHOP ZETUPAY CHECKOUT
-// ================================
+// =================================
 
 app.post('/api/shop/orders/zetupay', async (req, res) => {
   let orderId = null;
@@ -1184,9 +1182,9 @@ app.post('/api/shop/orders/zetupay', async (req, res) => {
   }
 });
 
-// ================================
+// =================================
 // SEED PAYMENT STATUS CHECK
-// ================================
+// =================================
 
 app.get('/api/orders/:id/payment', async (req, res) => {
   try {
@@ -1286,9 +1284,9 @@ app.get('/api/orders/:id/payment', async (req, res) => {
   }
 });
 
-// ================================
+// =================================
 // FARM SHOP PAYMENT STATUS
-// ================================
+// =================================
 
 app.get('/api/shop/orders/:id/payment', async (req, res) => {
   try {
@@ -1388,9 +1386,9 @@ app.get('/api/shop/orders/:id/payment', async (req, res) => {
   }
 });
 
-// ================================
+// =================================
 // CUSTOMER SEED ORDER LOOKUP
-// ================================
+// =================================
 
 app.post('/api/orders/lookup', async (req, res) => {
   const phone = clean(req.body?.phone, 40).replace(/\s/g, '');
@@ -1429,9 +1427,9 @@ app.post('/api/orders/lookup', async (req, res) => {
   }
 });
 
-// ================================
+// =================================
 // CUSTOMER FARM SHOP LOOKUP
-// ================================
+// =================================
 
 app.post('/api/shop/orders/lookup', async (req, res) => {
   const phone = clean(req.body?.phone, 40).replace(/\s/g, '');
@@ -1467,9 +1465,9 @@ app.post('/api/shop/orders/lookup', async (req, res) => {
   }
 });
 
-// ================================
+// =================================
 // ADMIN LOGIN
-// ================================
+// =================================
 
 app.post('/api/admin/login', async (req, res) => {
   const password = String(req.body?.password || '');
@@ -1495,9 +1493,9 @@ app.post('/api/admin/login', async (req, res) => {
   });
 });
 
-// ================================
+// =================================
 // ADMIN SEED ORDER LIST
-// ================================
+// =================================
 
 app.get('/api/admin/orders', auth, async (_req, res) => {
   try {
@@ -1531,9 +1529,9 @@ app.get('/api/admin/orders', auth, async (_req, res) => {
   }
 });
 
-// ================================
+// =================================
 // ADMIN FARM SHOP ORDERS
-// ================================
+// =================================
 
 app.get('/api/admin/shop-orders', auth, async (_req, res) => {
   try {
@@ -1563,9 +1561,9 @@ app.get('/api/admin/shop-orders', auth, async (_req, res) => {
   }
 });
 
-// ================================
+// =================================
 // ADMIN UPDATE SEED ORDER STATUS
-// ================================
+// =================================
 
 app.patch('/api/admin/orders/:id', auth, async (req, res) => {
   const pay = [
@@ -1618,9 +1616,9 @@ app.patch('/api/admin/orders/:id', auth, async (req, res) => {
   }
 });
 
-// ================================
+// =================================
 // ADMIN UPDATE FARM SHOP ORDER
-// ================================
+// =================================
 
 app.patch('/api/admin/shop-orders/:id', auth, async (req, res) => {
   const pay = [
@@ -1673,9 +1671,9 @@ app.patch('/api/admin/shop-orders/:id', auth, async (req, res) => {
   }
 });
 
-// ================================
+// =================================
 // ADMIN UPDATE SEED PRODUCT
-// ================================
+// =================================
 
 app.patch('/api/admin/products/:id', auth, async (req, res) => {
   const price = Number(req.body?.price);
@@ -1720,9 +1718,9 @@ app.patch('/api/admin/products/:id', auth, async (req, res) => {
   }
 });
 
-// ================================
+// =================================
 // ADMIN UPDATE FARM SHOP PRODUCT
-// ================================
+// =================================
 
 app.patch('/api/admin/shop-products/:id', auth, async (req, res) => {
   const price = Number(req.body?.price);
@@ -1767,17 +1765,17 @@ app.patch('/api/admin/shop-products/:id', auth, async (req, res) => {
   }
 });
 
-// ================================
+// =================================
 // WEBSITE HOME PAGE
-// ================================
+// =================================
 
 app.get('/', (_req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// ================================
+// =================================
 // START SERVER
-// ================================
+// =================================
 
 init()
   .then(() => {
