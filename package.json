@@ -1,11 +1,16 @@
+
 {
   "name": "kisima-certified-seeds-online",
   "version": "1.0.0",
   "private": true,
   "description": "Kisima Certified Seeds online ordering and admin app",
   "main": "server.js",
-  "scripts": {"start": "node server.js"},
-  "engines": {"node": ">=20"},
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": "22.x"
+  },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "express": "^4.21.2",
