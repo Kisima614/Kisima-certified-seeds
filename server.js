@@ -1,3 +1,4 @@
+
 const express = require('express');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
@@ -47,7 +48,10 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: process.env.DATABASE_SSL === 'false'
     ? false
-    : { rejectUnauthorized: false }
+    : { rejectUnauthorized: false },
+  max: 10,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 10000
 });
 
 // =================================
@@ -162,7 +166,7 @@ async function init() {
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS zetupay_reference TEXT;
 
     CREATE TABLE IF NOT EXISTS shop_products (
-      id TEXT PRIMARY PRIMARY KEY,
+      id TEXT PRIMARY KEY,
       name TEXT NOT NULL,
       category TEXT NOT NULL,
       unit TEXT NOT NULL,
@@ -176,7 +180,7 @@ async function init() {
     ADD COLUMN IF NOT EXISTS image TEXT NOT NULL DEFAULT '';
 
     CREATE TABLE IF NOT EXISTS shop_orders (
-      id TEXT PRIMARY PRIMARY KEY,
+      id TEXT PRIMARY KEY,
       customer TEXT NOT NULL,
       phone TEXT NOT NULL,
       email TEXT NOT NULL DEFAULT '',
@@ -331,7 +335,8 @@ async function zetuPayRequest(endpoint, options = {}) {
         Authorization: `Bearer ${zetuPayKey()}`,
         'Content-Type': 'application/json',
         ...(options.headers || {})
-      }
+      },
+      signal: AbortSignal.timeout(20000)
     }
   );
 
@@ -363,7 +368,7 @@ async function getZetuPayPayment(paymentKey) {
       headers: {
         Accept: 'application/json'
       },
-      cache: 'no-store'
+      signal: AbortSignal.timeout(15000)
     }
   );
 
@@ -605,7 +610,10 @@ app.get('/product-images/:product', (req, res) => {
 // STATIC WEBSITE
 // =================================
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), {
+  maxAge: '1h',
+  etag: true
+}));
 
 // =================================
 // HEALTH CHECK
@@ -1661,13 +1669,35 @@ app.get('/', (_req, res) => {
 // START SERVER
 // =================================
 
-init()
-  .then(() => {
-    app.listen(process.env.PORT || 3000, '0.0.0.0', () => {
-      console.log('Kisima app running with ZetuPay and Farm Shop');
+async function startServer() {
+  try {
+    await init();
+
+    const PORT = Number(process.env.PORT) || 3000;
+
+    const server = app.listen(PORT, '0.0.0.0', () => {
+      console.log(`Kisima app running on port ${PORT}`);
+      console.log('ZetuPay and Farm Shop enabled.');
     });
-  })
-  .catch(e => {
+
+    server.on('error', (error) => {
+      console.error('SERVER START ERROR:', error.message);
+      process.exit(1);
+    });
+
+    process.on('SIGTERM', () => {
+      console.log('SIGTERM received. Closing server.');
+
+      server.close(async () => {
+        await pool.end();
+        process.exit(0);
+      });
+    });
+
+  } catch (e) {
     console.error('Database initialization failed:', e.message);
     process.exit(1);
-  });
+  }
+}
+
+startServer();
